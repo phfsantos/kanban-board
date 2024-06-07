@@ -1,0 +1,39 @@
+{
+  "name": "kanban-board",
+  "version": "1.0.0",
+  "description": "A kanban board as an add-on to markdown files.",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "concurrently \"tsc --watch\" \"es-dev-server --app-index index.html --node-resolve --watch --open\"",
+    "build": "rimraf /dist && tsc && rollup -c",
+    "ts": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phfsantos/kanban-board.git"
+  },
+  "keywords": [
+    "kanban",
+    "lit-element",
+    "lit"
+  ],
+  "author": "Pedro Santos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/phfsantos/kanban-board/issues"
+  },
+  "homepage": "https://github.com/phfsantos/kanban-board#readme",
+  "dependencies": {
+    "lit": "^3.1.4"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-strip": "^3.0.4",
+    "@rollup/plugin-terser": "^0.4.4",
+    "concurrently": "^8.2.2",
+    "es-dev-server": "^1.55.1",
+    "rimraf": "^5.0.7",
+    "rollup": "^4.18.0",
+    "typescript": "^5.4.5"
+  }
+}
