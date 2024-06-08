@@ -55,10 +55,10 @@ export class KanbanBoard extends LitElement {
     dialog {
       z-index: 10;
       margin-top: 10px;
-      background: rgba(120, 120, 120, 0.1);
       border: none;
       border-radius: 1rem;
       margin: auto;
+      padding: 40px;
     }
 
     dialog::backdrop {
