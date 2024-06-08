@@ -1,6 +1,6 @@
 {
   "name": "kanban-board",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A kanban board as an add-on to markdown files.",
   "main": "dist/index.js",
   "scripts": {

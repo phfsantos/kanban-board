@@ -95,17 +95,13 @@ export default class Item extends LitElement {
   }
 
   private _deleteHandler(e: Event) {
-    const check = confirm("Are you sure you want to delete this item?");
-
-    if (check) {
-      this.dispatchEvent(
-        new CustomEvent("kanban-item-delete", {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.id },
-        })
-      );
-    }
+    this.dispatchEvent(
+      new CustomEvent("kanban-item-delete", {
+        bubbles: true,
+        composed: true,
+        detail: { id: this.id },
+      })
+    );
   }
 
   private _dragStartHandler(e: DragEvent) {

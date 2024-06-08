@@ -16,6 +16,7 @@ export declare class KanbanBoard extends LitElement {
     private kanbanAPI;
     static styles: import("lit").CSSResult;
     data: KanbanBoardData;
+    _dialog: HTMLDialogElement;
     connectedCallback(): void;
     disconnectedCallback(): void;
     render(): import("lit-html").TemplateResult<1>;

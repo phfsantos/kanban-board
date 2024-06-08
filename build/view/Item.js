@@ -46,14 +46,11 @@ let Item = class Item extends LitElement {
         }));
     }
     _deleteHandler(e) {
-        const check = confirm("Are you sure you want to delete this item?");
-        if (check) {
-            this.dispatchEvent(new CustomEvent("kanban-item-delete", {
-                bubbles: true,
-                composed: true,
-                detail: { id: this.id },
-            }));
-        }
+        this.dispatchEvent(new CustomEvent("kanban-item-delete", {
+            bubbles: true,
+            composed: true,
+            detail: { id: this.id },
+        }));
     }
     _dragStartHandler(e) {
         e.dataTransfer.setData("text/plain", this.id);
