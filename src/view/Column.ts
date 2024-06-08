@@ -17,17 +17,35 @@ export default class Column extends LitElement {
   static styles = css`
     :host {
       flex: 1;
+      font-family: inherit;
     }
 
-    :host:not(:last-child) {
-      margin-right: 30px;
+    :host * {
+      font-family: inherit;
     }
 
     .kanban__column-title {
       margin-bottom: 20px;
       font-size: 30px;
-      color: white;
+      color: inherit;
       user-select: none;
+    }
+
+    .kanban__add-item {
+      width: 100%;
+      padding: 10px 5px;
+      margin-top: 10px;
+      font-size: 16px;
+      color: inherit;
+      background: rgba(0, 0, 0, 0.1);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .kanban__add-item:hover {
+      background: rgba(0, 0, 0, 0.2);
     }
   `;
 

@@ -10,7 +10,13 @@ export default class DropZone extends LitElement {
     }
 
     .kanban__dropzone--active {
-      height: 20px;
+      padding: 10px 0;
+      height: 38px;
+    }
+
+    .kanban__dropzone--active .kanban__dropzone-content {
+      width: 100%;
+      height: 100%;
       background: rgba(0, 0, 0, 0.25);
     }
   `;
@@ -19,7 +25,11 @@ export default class DropZone extends LitElement {
   _dropzone: HTMLDivElement;
 
   render() {
-    return html` <div class="kanban__dropzone"></div> `;
+    return html`
+      <div class="kanban__dropzone">
+        <div class="kanban__dropzone-content"></div>
+      </div>
+    `;
   }
 
   connectedCallback(): void {

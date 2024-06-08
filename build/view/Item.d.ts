@@ -5,6 +5,7 @@ export default class Item extends LitElement {
     _input: HTMLDivElement;
     constructor();
     static styles: import("lit").CSSResult;
+    update(changedProperties: any): void;
     render(): import("lit-html").TemplateResult<1>;
     private _blurHandler;
     private _deleteHandler;

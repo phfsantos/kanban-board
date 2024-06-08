@@ -68,28 +68,29 @@ let KanbanBoard = class KanbanBoard extends LitElement {
     }
 };
 KanbanBoard.styles = css `
+    :host {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
     .kanban {
       display: flex;
       padding: 30px;
-      width: 750px;
-      background: #009578;
       border-radius: 5px;
-      gap: 20px;
     }
 
-    .kanban * {
-      font-family: sans-serif;
+    :host * {
+      font-family: inherit;
     }
 
-    .kanban__add-item {
-      width: 100%;
-      padding: 10px 0;
-      font-size: 16px;
-      color: white;
-      background: rgba(0, 0, 0, 0.1);
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    kanban-column:not(:first-child) {
+			padding-left: 15px;
+    }
+
+    kanban-column:not(:last-child) {
+			border-right: 1px solid rgba(120, 120, 120, 0.9);
+			padding-right: 15px;
     }
   `;
 __decorate([

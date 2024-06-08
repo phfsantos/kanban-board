@@ -30,7 +30,11 @@ let DropZone = class DropZone extends LitElement {
         };
     }
     render() {
-        return html ` <div class="kanban__dropzone"></div> `;
+        return html `
+      <div class="kanban__dropzone">
+        <div class="kanban__dropzone-content"></div>
+      </div>
+    `;
     }
     connectedCallback() {
         super.connectedCallback();
@@ -52,7 +56,13 @@ DropZone.styles = css `
     }
 
     .kanban__dropzone--active {
-      height: 20px;
+      padding: 10px 0;
+      height: 38px;
+    }
+
+    .kanban__dropzone--active .kanban__dropzone-content {
+      width: 100%;
+      height: 100%;
       background: rgba(0, 0, 0, 0.25);
     }
   `;
