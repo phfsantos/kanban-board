@@ -24,4 +24,5 @@ export declare class KanbanBoard extends LitElement {
     private _itemUpdateHandler;
     private _itemDeleteHandler;
     private _itemAddHandler;
+    private _columnUpdateHandler;
 }

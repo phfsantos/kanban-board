@@ -39,6 +39,19 @@ export class KanbanController implements ReactiveController {
     return item;
   }
 
+  updateColumn(columnId: string, newTitle: string) {
+    const data = { ...this.host.data };
+    const [column] = data.columns.filter((column) => column.id == columnId);
+
+    if (!column) {
+      throw new Error("Column not found.");
+    }
+
+    column.title = newTitle === undefined ? column.title : newTitle;
+
+    this._saveData(data);
+  }
+
   updateItem(itemId, newProps) {
     const data = { ...this.host.data };
     const [item, currentColumn] = (() => {

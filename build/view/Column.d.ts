@@ -7,6 +7,8 @@ export default class Column extends LitElement {
     title: string;
     items: KanbanItem[];
     static styles: import("lit").CSSResult;
+    _input: HTMLDivElement;
     protected render(): ReturnType<LitElement["render"]>;
+    private _blurHandler;
     private _addItem;
 }

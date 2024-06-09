@@ -18,10 +18,17 @@ export class KanbanController {
             throw new Error("Column does not exist.");
         }
         column.items.push(item);
-        this.host.textContent = JSON.stringify(data);
-        this.host.data = data;
-        this.host.requestUpdate("data");
+        this._saveData(data);
         return item;
+    }
+    updateColumn(columnId, newTitle) {
+        const data = Object.assign({}, this.host.data);
+        const [column] = data.columns.filter((column) => column.id == columnId);
+        if (!column) {
+            throw new Error("Column not found.");
+        }
+        column.title = newTitle === undefined ? column.title : newTitle;
+        this._saveData(data);
     }
     updateItem(itemId, newProps) {
         const data = Object.assign({}, this.host.data);
@@ -49,9 +56,7 @@ export class KanbanController {
             // Move item into it's new column and position
             targetColumn.items.splice(newProps.position, 0, item);
         }
-        this.host.textContent = JSON.stringify(data);
-        this.host.data = data;
-        this.host.requestUpdate("data");
+        this._saveData(data);
     }
     deleteItem(itemId) {
         const data = Object.assign({}, this.host.data);
@@ -61,9 +66,13 @@ export class KanbanController {
                 column.items.splice(column.items.indexOf(item), 1);
             }
         }
+        this._saveData(data);
+    }
+    _saveData(data) {
         this.host.textContent = JSON.stringify(data);
         this.host.data = data;
         this.host.requestUpdate("data");
+        this.host.dispatchEvent(new CustomEvent("kanban-save", { detail: data, bubbles: true, composed: true }));
     }
 }
 //# sourceMappingURL=kanban.js.map

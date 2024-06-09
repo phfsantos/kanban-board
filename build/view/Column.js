@@ -4,13 +4,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 import { LitElement, css, html } from "lit";
 import "./Item";
 import "./DropZone";
 let Column = class Column extends LitElement {
     render() {
-        return html ` <div class="kanban__column-title">${this.title}</div>
+        return html ` <div class="kanban__column-title" @blur="${this._blurHandler}" contenteditable >${this.title}</div>
       <div class="kanban__column-items">
         <kanban-dropzone></kanban-dropzone>
         ${this.items.map((item) => html `<kanban-item
@@ -22,6 +22,17 @@ let Column = class Column extends LitElement {
       <button class="kanban__add-item" @click="${this._addItem}" type="button">
         + Add
       </button>`;
+    }
+    _blurHandler() {
+        const newTitle = this._input.innerText.trim();
+        if (newTitle == this.title) {
+            return;
+        }
+        this.dispatchEvent(new CustomEvent("kanban-column-update", {
+            bubbles: true,
+            composed: true,
+            detail: { id: this.id, title: newTitle },
+        }));
     }
     _addItem(_e) {
         const newItem = {
@@ -49,7 +60,6 @@ Column.styles = css `
       margin-bottom: 20px;
       font-size: 30px;
       color: inherit;
-      user-select: none;
     }
 
     .kanban__add-item {
@@ -78,6 +88,9 @@ __decorate([
 __decorate([
     property({ type: Array, reflect: true })
 ], Column.prototype, "items", void 0);
+__decorate([
+    query(".kanban__column-title")
+], Column.prototype, "_input", void 0);
 Column = __decorate([
     customElement("kanban-column")
 ], Column);

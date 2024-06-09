@@ -44,12 +44,12 @@ export class KanbanBoard extends LitElement {
     }
 
     kanban-column:not(:first-child) {
-			padding-left: 15px;
+      padding-left: 15px;
     }
 
     kanban-column:not(:last-child) {
-			border-right: 1px solid rgba(120, 120, 120, 0.9);
-			padding-right: 15px;
+      border-right: 1px solid rgba(120, 120, 120, 0.9);
+      padding-right: 15px;
     }
 
     dialog {
@@ -87,9 +87,13 @@ export class KanbanBoard extends LitElement {
     }
   `;
 
-  @property({ reflect: true, type: Object  })
+  @property({ reflect: true, type: Object })
   data: KanbanBoardData = {
-    columns: [],
+    columns: [
+      { id: "1", title: "Todo", items: [] },
+      { id: "2", title: "Doing", items: [] },
+      { id: "3", title: "Done", items: [] },
+    ],
   };
 
   @query("dialog")
@@ -101,6 +105,7 @@ export class KanbanBoard extends LitElement {
     window.addEventListener("kanban-item-update", this._itemUpdateHandler);
     window.addEventListener("kanban-item-delete", this._itemDeleteHandler);
     window.addEventListener("kanban-item-add", this._itemAddHandler);
+    window.addEventListener("kanban-column-update", this._columnUpdateHandler);
   }
 
   disconnectedCallback(): void {
@@ -109,32 +114,29 @@ export class KanbanBoard extends LitElement {
     window.removeEventListener("kanban-item-update", this._itemUpdateHandler);
     window.removeEventListener("kanban-item-delete", this._itemDeleteHandler);
     window.removeEventListener("kanban-item-add", this._itemAddHandler);
+    window.removeEventListener("kanban-column-update", this._columnUpdateHandler);
   }
 
   render() {
-    console.log("rendering", {data: this.data});
+    console.log("rendering", { data: this.data });
 
     return html` <div class="kanban">
       ${this.data?.columns?.map((column) => {
         return html`<kanban-column
-          id="${column.id}"
-          title="${column.title}"
-          items="${JSON.stringify(column.items)}"
-        ></kanban-column>
-        <!-- A modal dialog containing a form -->
-        <dialog id="favDialog">
-          <form>
-            <p>
-              Are you sure you want to delete this item?
-            </p>
-            <div>
-              <button value="cancel" formmethod="dialog">Cancel</button>
-              <button id="confirmBtn" value="yes">Confirm</button>
-            </div>
-          </form>
-        </dialog>
-        
-        `;
+            id="${column.id}"
+            title="${column.title}"
+            items="${JSON.stringify(column.items)}"
+          ></kanban-column>
+          <!-- A modal dialog containing a form -->
+          <dialog id="favDialog">
+            <form>
+              <p>Are you sure you want to delete this item?</p>
+              <div>
+                <button value="cancel" formmethod="dialog">Cancel</button>
+                <button id="confirmBtn" value="yes">Confirm</button>
+              </div>
+            </form>
+          </dialog> `;
       })}
     </div>`;
   }
@@ -153,29 +155,31 @@ export class KanbanBoard extends LitElement {
       columnId,
       position: droppedIndex,
     });
-  }
+  };
 
   private _itemUpdateHandler = (e: CustomEvent) => {
     this.kanbanAPI.updateItem(e.detail.id, { content: e.detail.content });
-  }
+  };
 
   private _itemDeleteHandler = (e: CustomEvent) => {
-    const confirmBtn = this._dialog.querySelector("#confirmBtn") as HTMLButtonElement;
+    const confirmBtn = this._dialog.querySelector(
+      "#confirmBtn"
+    ) as HTMLButtonElement;
 
     // "Show the dialog" opens the <dialog> modally
     this._dialog.showModal();
 
-    this._dialog.addEventListener("click", e => {
-      const dialogDimensions = this._dialog.getBoundingClientRect()
+    this._dialog.addEventListener("click", (e) => {
+      const dialogDimensions = this._dialog.getBoundingClientRect();
       if (
         e.clientX < dialogDimensions.left ||
         e.clientX > dialogDimensions.right ||
         e.clientY < dialogDimensions.top ||
         e.clientY > dialogDimensions.bottom
       ) {
-        this._dialog.close("cancel")
+        this._dialog.close("cancel");
       }
-    })
+    });
 
     // Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
     confirmBtn.addEventListener("click", (event) => {
@@ -189,13 +193,13 @@ export class KanbanBoard extends LitElement {
         this.kanbanAPI.deleteItem(e.detail.id);
       }
     });
-  }
+  };
 
   private _itemAddHandler = (e: CustomEvent) => {
     this.kanbanAPI.insertItem(e.detail.columnId, e.detail.item);
+  };
+
+  private _columnUpdateHandler = (e: CustomEvent) => {
+    this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
   }
-
-
-
-
 }

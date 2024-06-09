@@ -14,7 +14,11 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         // Create the controller and store it
         this.kanbanAPI = new KanbanController(this);
         this.data = {
-            columns: [],
+            columns: [
+                { id: "1", title: "Todo", items: [] },
+                { id: "2", title: "Doing", items: [] },
+                { id: "3", title: "Done", items: [] },
+            ],
         };
         this._itemDropHandler = (e) => {
             var _a, _b, _c;
@@ -36,7 +40,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
             const confirmBtn = this._dialog.querySelector("#confirmBtn");
             // "Show the dialog" opens the <dialog> modally
             this._dialog.showModal();
-            this._dialog.addEventListener("click", e => {
+            this._dialog.addEventListener("click", (e) => {
                 const dialogDimensions = this._dialog.getBoundingClientRect();
                 if (e.clientX < dialogDimensions.left ||
                     e.clientX > dialogDimensions.right ||
@@ -60,6 +64,9 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         this._itemAddHandler = (e) => {
             this.kanbanAPI.insertItem(e.detail.columnId, e.detail.item);
         };
+        this._columnUpdateHandler = (e) => {
+            this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
+        };
     }
     connectedCallback() {
         super.connectedCallback();
@@ -67,6 +74,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         window.addEventListener("kanban-item-update", this._itemUpdateHandler);
         window.addEventListener("kanban-item-delete", this._itemDeleteHandler);
         window.addEventListener("kanban-item-add", this._itemAddHandler);
+        window.addEventListener("kanban-column-update", this._columnUpdateHandler);
     }
     disconnectedCallback() {
         super.disconnectedCallback();
@@ -74,6 +82,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         window.removeEventListener("kanban-item-update", this._itemUpdateHandler);
         window.removeEventListener("kanban-item-delete", this._itemDeleteHandler);
         window.removeEventListener("kanban-item-add", this._itemAddHandler);
+        window.removeEventListener("kanban-column-update", this._columnUpdateHandler);
     }
     render() {
         var _a, _b;
@@ -81,24 +90,20 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         return html ` <div class="kanban">
       ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
             return html `<kanban-column
-          id="${column.id}"
-          title="${column.title}"
-          items="${JSON.stringify(column.items)}"
-        ></kanban-column>
-        <!-- A modal dialog containing a form -->
-        <dialog id="favDialog">
-          <form>
-            <p>
-              Are you sure you want to delete this item?
-            </p>
-            <div>
-              <button value="cancel" formmethod="dialog">Cancel</button>
-              <button id="confirmBtn" value="yes">Confirm</button>
-            </div>
-          </form>
-        </dialog>
-        
-        `;
+            id="${column.id}"
+            title="${column.title}"
+            items="${JSON.stringify(column.items)}"
+          ></kanban-column>
+          <!-- A modal dialog containing a form -->
+          <dialog id="favDialog">
+            <form>
+              <p>Are you sure you want to delete this item?</p>
+              <div>
+                <button value="cancel" formmethod="dialog">Cancel</button>
+                <button id="confirmBtn" value="yes">Confirm</button>
+              </div>
+            </form>
+          </dialog> `;
         })}
     </div>`;
     }
@@ -123,21 +128,21 @@ KanbanBoard.styles = css `
     }
 
     kanban-column:not(:first-child) {
-			padding-left: 15px;
+      padding-left: 15px;
     }
 
     kanban-column:not(:last-child) {
-			border-right: 1px solid rgba(120, 120, 120, 0.9);
-			padding-right: 15px;
+      border-right: 1px solid rgba(120, 120, 120, 0.9);
+      padding-right: 15px;
     }
 
     dialog {
       z-index: 10;
       margin-top: 10px;
-      background: rgba(120, 120, 120, 0.1);
       border: none;
       border-radius: 1rem;
       margin: auto;
+      padding: 40px;
     }
 
     dialog::backdrop {

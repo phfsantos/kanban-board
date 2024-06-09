@@ -1,4 +1,4 @@
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 import { LitElement, css, html } from "lit";
 import { KanbanItem } from "../index.js";
 
@@ -28,7 +28,6 @@ export default class Column extends LitElement {
       margin-bottom: 20px;
       font-size: 30px;
       color: inherit;
-      user-select: none;
     }
 
     .kanban__add-item {
@@ -49,8 +48,11 @@ export default class Column extends LitElement {
     }
   `;
 
+	@query(".kanban__column-title")
+	_input: HTMLDivElement;
+
   protected render(): ReturnType<LitElement["render"]> {
-    return html` <div class="kanban__column-title">${this.title}</div>
+    return html` <div class="kanban__column-title" @blur="${this._blurHandler}" contenteditable >${this.title}</div>
       <div class="kanban__column-items">
         <kanban-dropzone></kanban-dropzone>
         ${this.items.map(
@@ -65,6 +67,22 @@ export default class Column extends LitElement {
       <button class="kanban__add-item" @click="${this._addItem}" type="button">
         + Add
       </button>`;
+  }
+
+	private _blurHandler() {
+    const newTitle = this._input.innerText.trim();
+
+    if (newTitle == this.title) {
+      return;
+    }
+
+    this.dispatchEvent(
+      new CustomEvent("kanban-column-update", {
+        bubbles: true,
+        composed: true,
+        detail: { id: this.id, title: newTitle },
+      })
+    );
   }
 
   private _addItem(_e: MouseEvent) {
