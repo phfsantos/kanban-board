@@ -34,9 +34,7 @@ export class KanbanController implements ReactiveController {
 
     column.items.push(item);
 
-    this.host.textContent = JSON.stringify(data);
-    this.host.data = data;
-    this.host.requestUpdate("data");
+    this._saveData(data);
 
     return item;
   }
@@ -77,9 +75,8 @@ export class KanbanController implements ReactiveController {
       targetColumn.items.splice(newProps.position, 0, item);
     }
 
-    this.host.textContent = JSON.stringify(data);
-    this.host.data = data;
-    this.host.requestUpdate("data");
+    this._saveData(data);
+
   }
 
   deleteItem(itemId) {
@@ -93,8 +90,13 @@ export class KanbanController implements ReactiveController {
       }
     }
 
+    this._saveData(data);
+  }
+
+  private _saveData(data) {
     this.host.textContent = JSON.stringify(data);
     this.host.data = data;
     this.host.requestUpdate("data");
+    this.host.dispatchEvent(new CustomEvent("kanban-save", { detail: data, bubbles: true, composed: true}));
   }
 }
