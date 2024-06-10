@@ -114,7 +114,10 @@ export class KanbanBoard extends LitElement {
     window.removeEventListener("kanban-item-update", this._itemUpdateHandler);
     window.removeEventListener("kanban-item-delete", this._itemDeleteHandler);
     window.removeEventListener("kanban-item-add", this._itemAddHandler);
-    window.removeEventListener("kanban-column-update", this._columnUpdateHandler);
+    window.removeEventListener(
+      "kanban-column-update",
+      this._columnUpdateHandler
+    );
   }
 
   render() {
@@ -123,21 +126,21 @@ export class KanbanBoard extends LitElement {
     return html` <div class="kanban">
       ${this.data?.columns?.map((column) => {
         return html`<kanban-column
-            id="${column.id}"
-            title="${column.title}"
-            items="${JSON.stringify(column.items)}"
-          ></kanban-column>
-          <!-- A modal dialog containing a form -->
-          <dialog id="favDialog">
-            <form>
-              <p>Are you sure you want to delete this item?</p>
-              <div>
-                <button value="cancel" formmethod="dialog">Cancel</button>
-                <button id="confirmBtn" value="yes">Confirm</button>
-              </div>
-            </form>
-          </dialog> `;
+          id="${column.id}"
+          title="${column.title}"
+          items="${JSON.stringify(column.items)}"
+        ></kanban-column>`;
       })}
+      <!-- A modal dialog containing a form -->
+      <dialog id="favDialog">
+        <form>
+          <p>Are you sure you want to delete this item?</p>
+          <div>
+            <button value="cancel" formmethod="dialog">Cancel</button>
+            <button id="confirmBtn" value="yes">Confirm</button>
+          </div>
+        </form>
+      </dialog>
     </div>`;
   }
 
@@ -201,5 +204,5 @@ export class KanbanBoard extends LitElement {
 
   private _columnUpdateHandler = (e: CustomEvent) => {
     this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
-  }
+  };
 }
