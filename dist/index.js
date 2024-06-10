@@ -153,20 +153,20 @@ function ht(t,e){return(e,i,n)=>((t,e,i)=>(i.configurable=!0,i.enumerable=!0,Ref
     }
   `,ft([lt()],bt.prototype,"id",void 0),ft([lt()],bt.prototype,"title",void 0),ft([lt({type:Array,reflect:!0})],bt.prototype,"items",void 0),ft([ht(".kanban__column-title")],bt.prototype,"_input",void 0),bt=ft([rt("kanban-column")],bt);var vt=function(t,e,i,n){var s,o=arguments.length,r=o<3?e:null===n?n=Object.getOwnPropertyDescriptor(e,i):n;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)r=Reflect.decorate(t,e,i,n);else for(var a=t.length-1;a>=0;a--)(s=t[a])&&(r=(o<3?s(r):o>3?s(e,i,r):s(e,i))||r);return o>3&&r&&Object.defineProperty(e,i,r),r};let gt=class extends st{constructor(){super(...arguments),this.kanbanAPI=new ct(this),this.data={columns:[{id:"1",title:"Todo",items:[]},{id:"2",title:"Doing",items:[]},{id:"3",title:"Done",items:[]}]},this._itemDropHandler=t=>{var e,i,n;const s=t.detail.dropzone,o=null===(n=null===(i=null===(e=s.parentElement)||void 0===e?void 0:e.parentNode)||void 0===i?void 0:i.host)||void 0===n?void 0:n.id,r=Array.from(s.parentElement.querySelectorAll("kanban-dropzone")).indexOf(s),a=t.detail.itemId;this.kanbanAPI.updateItem(a,{columnId:o,position:r})},this._itemUpdateHandler=t=>{this.kanbanAPI.updateItem(t.detail.id,{content:t.detail.content})},this._itemDeleteHandler=t=>{const e=this._dialog.querySelector("#confirmBtn");this._dialog.showModal(),this._dialog.addEventListener("click",(t=>{const e=this._dialog.getBoundingClientRect();(t.clientX<e.left||t.clientX>e.right||t.clientY<e.top||t.clientY>e.bottom)&&this._dialog.close("cancel")})),e.addEventListener("click",(t=>{t.preventDefault(),this._dialog.close(e.value)})),this._dialog.addEventListener("close",(e=>{"yes"===this._dialog.returnValue&&this.kanbanAPI.deleteItem(t.detail.id)}))},this._itemAddHandler=t=>{this.kanbanAPI.insertItem(t.detail.columnId,t.detail.item)},this._columnUpdateHandler=t=>{this.kanbanAPI.updateColumn(t.detail.id,t.detail.title)}}connectedCallback(){super.connectedCallback(),window.addEventListener("kanban-item-drop",this._itemDropHandler),window.addEventListener("kanban-item-update",this._itemUpdateHandler),window.addEventListener("kanban-item-delete",this._itemDeleteHandler),window.addEventListener("kanban-item-add",this._itemAddHandler),window.addEventListener("kanban-column-update",this._columnUpdateHandler)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("kanban-item-drop",this._itemDropHandler),window.removeEventListener("kanban-item-update",this._itemUpdateHandler),window.removeEventListener("kanban-item-delete",this._itemDeleteHandler),window.removeEventListener("kanban-item-add",this._itemAddHandler),window.removeEventListener("kanban-column-update",this._columnUpdateHandler)}render(){var t,e;return M` <div class="kanban">
       ${null===(e=null===(t=this.data)||void 0===t?void 0:t.columns)||void 0===e?void 0:e.map((t=>M`<kanban-column
-            id="${t.id}"
-            title="${t.title}"
-            items="${JSON.stringify(t.items)}"
-          ></kanban-column>
-          <!-- A modal dialog containing a form -->
-          <dialog id="favDialog">
-            <form>
-              <p>Are you sure you want to delete this item?</p>
-              <div>
-                <button value="cancel" formmethod="dialog">Cancel</button>
-                <button id="confirmBtn" value="yes">Confirm</button>
-              </div>
-            </form>
-          </dialog> `))}
+          id="${t.id}"
+          title="${t.title}"
+          items="${JSON.stringify(t.items)}"
+        ></kanban-column>`))}
+      <!-- A modal dialog containing a form -->
+      <dialog id="favDialog">
+        <form>
+          <p>Are you sure you want to delete this item?</p>
+          <div>
+            <button value="cancel" formmethod="dialog">Cancel</button>
+            <button id="confirmBtn" value="yes">Confirm</button>
+          </div>
+        </form>
+      </dialog>
     </div>`}};gt.styles=o`
     :host {
       display: block;

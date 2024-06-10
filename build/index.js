@@ -90,21 +90,21 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         return html ` <div class="kanban">
       ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
             return html `<kanban-column
-            id="${column.id}"
-            title="${column.title}"
-            items="${JSON.stringify(column.items)}"
-          ></kanban-column>
-          <!-- A modal dialog containing a form -->
-          <dialog id="favDialog">
-            <form>
-              <p>Are you sure you want to delete this item?</p>
-              <div>
-                <button value="cancel" formmethod="dialog">Cancel</button>
-                <button id="confirmBtn" value="yes">Confirm</button>
-              </div>
-            </form>
-          </dialog> `;
+          id="${column.id}"
+          title="${column.title}"
+          items="${JSON.stringify(column.items)}"
+        ></kanban-column>`;
         })}
+      <!-- A modal dialog containing a form -->
+      <dialog id="favDialog">
+        <form>
+          <p>Are you sure you want to delete this item?</p>
+          <div>
+            <button value="cancel" formmethod="dialog">Cancel</button>
+            <button id="confirmBtn" value="yes">Confirm</button>
+          </div>
+        </form>
+      </dialog>
     </div>`;
     }
 };
