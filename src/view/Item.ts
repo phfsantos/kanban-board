@@ -1,21 +1,30 @@
-import { css, html, LitElement } from "lit";
-import DropZone from "./DropZone.js";
+import { css, html, LitElement, PropertyValueMap } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 
 @customElement("kanban-item")
 export default class Item extends LitElement {
+  // Define the properties for the kanban item
   @property()
   id: string;
   @property()
   content: string;
 
+  // Define the queries for the kanban item
   @query(".kanban__item-input")
   _input: HTMLDivElement;
 
+  /**
+   * Constructor
+   * @description This method is used to create an instance of the Item class
+   * @returns void
+   * @memberof Item
+   * @description This method is used to create an instance of the Item class
+   */
   constructor() {
     super();
   }
 
+  // Define the styles for the kanban item
   static styles = css`
     :host {
       position: relative;
@@ -50,7 +59,12 @@ export default class Item extends LitElement {
     }
   `;
 
-  update(changedProperties): void {
+  /**
+   * Update the kanban item
+   * @param changedProperties
+   * @returns void
+   */
+  update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     super.update(changedProperties);
     if (
       changedProperties.has("content") &&
@@ -60,7 +74,14 @@ export default class Item extends LitElement {
     }
   }
 
-  render() {
+  /**
+   * Render the kanban item
+   * @returns {ReturnType<LitElement["render"]>}
+   * @memberof Item
+   * @description This method is used to render the kanban item
+   * @returns void
+   */
+  render(): ReturnType<LitElement["render"]> {
     return html`<div
       class="kanban__item"
       data-id="${this.id}"
@@ -78,6 +99,13 @@ export default class Item extends LitElement {
     </div>`;
   }
 
+  /**
+   * Handle the blur event
+   * @returns void
+   * @private
+   * @memberof Item
+   * @description This method is used to handle the blur event
+   */
   private _blurHandler() {
     const newContent = this._input.innerText.trim();
 
@@ -94,6 +122,14 @@ export default class Item extends LitElement {
     );
   }
 
+  /**
+   * Handle the delete event
+   * @param e Event
+   * @returns void
+   * @private
+   * @memberof Item
+   * @description This method is used to handle the delete event
+   */
   private _deleteHandler(e: Event) {
     this.dispatchEvent(
       new CustomEvent("kanban-item-delete", {
@@ -104,10 +140,27 @@ export default class Item extends LitElement {
     );
   }
 
+  /**
+   * Handle the drag start event
+   * @param e DragEvent
+   * @returns void
+   * @private
+   * @memberof Item
+   * @description This method is used to handle the drag start event
+   */
   private _dragStartHandler(e: DragEvent) {
     e.dataTransfer.setData("text/plain", this.id);
   }
 
+  /**
+   * Prevent the default drop behavior
+   * @param e DragEvent
+   * @returns void
+   * @private
+   * @memberof Item
+   * @description This method is used to prevent the default drop behavior
+   * @returns void
+   */
   private _dropHandler(e: Event) {
     e.preventDefault();
   }

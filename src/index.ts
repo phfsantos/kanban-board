@@ -24,6 +24,7 @@ export class KanbanBoard extends LitElement {
   // Create the controller and store it
   private kanbanAPI = new KanbanController(this);
 
+  // Define the styles for the kanban board
   static styles = css`
     :host {
       display: block;
@@ -87,6 +88,7 @@ export class KanbanBoard extends LitElement {
     }
   `;
 
+  // Define the properties for the kanban board
   @property({ reflect: true, type: Object })
   data: KanbanBoardData = {
     columns: [
@@ -96,34 +98,88 @@ export class KanbanBoard extends LitElement {
     ],
   };
 
+  // Define the query selectors for the kanban board
   @query("dialog")
   _dialog: HTMLDialogElement;
 
+  @query("dialog button[value='yes']")
+  _dialogConfirmButton: HTMLButtonElement;
+
+  /**
+   * Constructor for the kanban board
+   * make sure we have some data to work with
+   * @param data
+   * @returns void
+   * @constructor
+   * @override
+   * @public
+   * @memberof KanbanBoard
+   * @since 1.0.0
+   * @version 1.0.0
+   * @example
+   * ```ts
+   * const kanban = new KanbanBoard({
+   *  columns: [
+   *     { id: "1", title: "Todo", items: [] },
+   *     { id: "2", title: "Doing", items: [] },
+   *     { id: "3", title: "Done", items: [] },
+   *   ],
+   * });
+   * ```
+   */
+  constructor(data: KanbanBoardData) {
+    super();
+    const defaultData = {
+      columns: [
+        { id: "1", title: "Todo", items: [] },
+        { id: "2", title: "Doing", items: [] },
+        { id: "3", title: "Done", items: [] },
+      ],
+    }
+    // set the data
+    this.data = data;
+
+    // if we don't have any data, we can't do anything
+    if (
+      !data ||
+      !data.columns ||
+      !Array.isArray(data.columns) ||
+      data.columns.length === 0
+    ) {
+      // set default data
+      this.data = defaultData;
+    }
+  }
+
+  /**
+   * Add event listeners
+   * @returns void
+   */
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener("kanban-item-drop", this._itemDropHandler);
-    window.addEventListener("kanban-item-update", this._itemUpdateHandler);
-    window.addEventListener("kanban-item-delete", this._itemDeleteHandler);
-    window.addEventListener("kanban-item-add", this._itemAddHandler);
-    window.addEventListener("kanban-column-update", this._columnUpdateHandler);
   }
 
+  /**
+   * Remove event listeners
+   * @returns void
+   */
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    window.removeEventListener("kanban-item-drop", this._itemDropHandler);
-    window.removeEventListener("kanban-item-update", this._itemUpdateHandler);
-    window.removeEventListener("kanban-item-delete", this._itemDeleteHandler);
-    window.removeEventListener("kanban-item-add", this._itemAddHandler);
-    window.removeEventListener(
-      "kanban-column-update",
-      this._columnUpdateHandler
-    );
   }
 
+  /**
+   * Render the kanban board
+   * @returns html
+   */
   render() {
-    console.log("rendering", { data: this.data });
-
-    return html` <div class="kanban">
+    return html`<div
+      class="kanban"
+      @kanban-item-drop="${this._itemDropHandler}"
+      @kanban-item-update="${this._itemUpdateHandler}"
+      @kanban-item-delete="${this._itemDeleteHandler}"
+      @kanban-item-add="${this._itemAddHandler}"
+      @kanban-column-update="${this._columnUpdateHandler}"
+    >
       ${this.data?.columns?.map((column) => {
         return html`<kanban-column
           id="${column.id}"
@@ -132,18 +188,23 @@ export class KanbanBoard extends LitElement {
         ></kanban-column>`;
       })}
       <!-- A modal dialog containing a form -->
-      <dialog id="favDialog">
+      <dialog>
         <form>
           <p>Are you sure you want to delete this item?</p>
           <div>
             <button value="cancel" formmethod="dialog">Cancel</button>
-            <button id="confirmBtn" value="yes">Confirm</button>
+            <button value="yes">Confirm</button>
           </div>
         </form>
       </dialog>
     </div>`;
   }
 
+  /**
+   * Update the item's column and position
+   * @param e CustomEvent
+   * @returns void
+   */
   private _itemDropHandler = (e: CustomEvent) => {
     const dropzone = e.detail.dropzone;
     const columnId = dropzone.parentElement?.parentNode?.host?.id;
@@ -160,15 +221,21 @@ export class KanbanBoard extends LitElement {
     });
   };
 
+  /**
+   * Update the item's content
+   * @param e CustomEvent
+   * @returns void
+   */
   private _itemUpdateHandler = (e: CustomEvent) => {
     this.kanbanAPI.updateItem(e.detail.id, { content: e.detail.content });
   };
 
+  /**
+   * Delete the item
+   * @param e CustomEvent
+   * @returns void
+   */
   private _itemDeleteHandler = (e: CustomEvent) => {
-    const confirmBtn = this._dialog.querySelector(
-      "#confirmBtn"
-    ) as HTMLButtonElement;
-
     // "Show the dialog" opens the <dialog> modally
     this._dialog.showModal();
 
@@ -185,9 +252,9 @@ export class KanbanBoard extends LitElement {
     });
 
     // Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
-    confirmBtn.addEventListener("click", (event) => {
+    this._dialogConfirmButton.addEventListener("click", (event) => {
       event.preventDefault(); // We don't want to submit this fake form
-      this._dialog.close(confirmBtn.value); // Have to send the select box value here.
+      this._dialog.close(this._dialogConfirmButton.value); // Have to send the select box value here.
     });
 
     // "Cancel" button closes the dialog without submitting because of [formmethod="dialog"], triggering a close event.
@@ -198,10 +265,20 @@ export class KanbanBoard extends LitElement {
     });
   };
 
+  /**
+   * Add a new item to the column
+   * @param e CustomEvent
+   * @returns void
+   */
   private _itemAddHandler = (e: CustomEvent) => {
     this.kanbanAPI.insertItem(e.detail.columnId, e.detail.item);
   };
 
+  /**
+   * Update the column's title
+   * @param e CustomEvent
+   * @returns void
+   */
   private _columnUpdateHandler = (e: CustomEvent) => {
     this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
   };

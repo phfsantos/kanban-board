@@ -9,13 +9,37 @@ import { customElement, query } from "lit/decorators.js";
 let DropZone = class DropZone extends LitElement {
     constructor() {
         super(...arguments);
+        /**
+         * Handle the drag over event
+         * @param {DragEvent} e
+         * @returns {void}
+         * @private
+         * @memberof DropZone
+         * @description This method is used to handle the drag over event
+         */
         this._dragOverHandler = (e) => {
             e.preventDefault();
             this._dropzone.classList.add("kanban__dropzone--active");
         };
+        /**
+         * Handle the drag leave event
+         * @param {DragEvent} e
+         * @returns {void}
+         * @private
+         * @memberof DropZone
+         * @description This method is used to handle the drag leave event
+         */
         this._dragLeaveHandler = (e) => {
             this._dropzone.classList.remove("kanban__dropzone--active");
         };
+        /**
+         * Handle the drop event
+         * @param {DragEvent} e
+         * @returns {void}
+         * @private
+         * @memberof DropZone
+         * @description This method is used to handle the drop event
+         */
         this._dropHandler = (e) => {
             e.preventDefault();
             this._dropzone.classList.remove("kanban__dropzone--active");
@@ -29,6 +53,11 @@ let DropZone = class DropZone extends LitElement {
             }));
         };
     }
+    /**
+     * Render the kanban dropzone
+     * @returns {ReturnType<LitElement["render"]>}
+     * @memberof DropZone
+     */
     render() {
         return html `
       <div class="kanban__dropzone">
@@ -36,12 +65,24 @@ let DropZone = class DropZone extends LitElement {
       </div>
     `;
     }
+    /**
+     * Connect the kanban dropzone
+     * @returns {void}
+     * @memberof DropZone
+     * @description This method is used to connect the kanban dropzone
+     */
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener("dragover", this._dragOverHandler);
         this.addEventListener("dragleave", this._dragLeaveHandler);
         this.addEventListener("drop", this._dropHandler);
     }
+    /**
+     * Disconnect the kanban dropzone
+     * @returns {void}
+     * @memberof DropZone
+     * @description This method is used to disconnect the kanban dropzone
+     */
     disconnectedCallback() {
         super.disconnectedCallback();
         this.removeEventListener("dragover", this._dragOverHandler);
@@ -49,6 +90,7 @@ let DropZone = class DropZone extends LitElement {
         this.removeEventListener("drop", this._dropHandler);
     }
 };
+// Define the styles for the kanban dropzone
 DropZone.styles = css `
     .kanban__dropzone {
       height: 10px;

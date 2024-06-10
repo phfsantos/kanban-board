@@ -7,9 +7,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import { css, html, LitElement } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 let Item = class Item extends LitElement {
+    /**
+     * Constructor
+     * @description This method is used to create an instance of the Item class
+     * @returns void
+     * @memberof Item
+     * @description This method is used to create an instance of the Item class
+     */
     constructor() {
         super();
     }
+    /**
+     * Update the kanban item
+     * @param changedProperties
+     * @returns void
+     */
     update(changedProperties) {
         super.update(changedProperties);
         if (changedProperties.has("content") &&
@@ -17,6 +29,13 @@ let Item = class Item extends LitElement {
             this._input.innerText = this.content;
         }
     }
+    /**
+     * Render the kanban item
+     * @returns {ReturnType<LitElement["render"]>}
+     * @memberof Item
+     * @description This method is used to render the kanban item
+     * @returns void
+     */
     render() {
         return html `<div
       class="kanban__item"
@@ -34,6 +53,13 @@ let Item = class Item extends LitElement {
       <div class="kanban__item-delete" @click="${this._deleteHandler}">🗑️</div>
     </div>`;
     }
+    /**
+     * Handle the blur event
+     * @returns void
+     * @private
+     * @memberof Item
+     * @description This method is used to handle the blur event
+     */
     _blurHandler() {
         const newContent = this._input.innerText.trim();
         if (newContent == this.content) {
@@ -45,6 +71,14 @@ let Item = class Item extends LitElement {
             detail: { id: this.id, content: newContent },
         }));
     }
+    /**
+     * Handle the delete event
+     * @param e Event
+     * @returns void
+     * @private
+     * @memberof Item
+     * @description This method is used to handle the delete event
+     */
     _deleteHandler(e) {
         this.dispatchEvent(new CustomEvent("kanban-item-delete", {
             bubbles: true,
@@ -52,13 +86,31 @@ let Item = class Item extends LitElement {
             detail: { id: this.id },
         }));
     }
+    /**
+     * Handle the drag start event
+     * @param e DragEvent
+     * @returns void
+     * @private
+     * @memberof Item
+     * @description This method is used to handle the drag start event
+     */
     _dragStartHandler(e) {
         e.dataTransfer.setData("text/plain", this.id);
     }
+    /**
+     * Prevent the default drop behavior
+     * @param e DragEvent
+     * @returns void
+     * @private
+     * @memberof Item
+     * @description This method is used to prevent the default drop behavior
+     * @returns void
+     */
     _dropHandler(e) {
         e.preventDefault();
     }
 };
+// Define the styles for the kanban item
 Item.styles = css `
     :host {
       position: relative;

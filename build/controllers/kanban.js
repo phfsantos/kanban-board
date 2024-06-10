@@ -1,9 +1,26 @@
 export class KanbanController {
+    // Define the constructor for the kanban controller
     constructor(host) {
         (this.host = host).addController(this);
     }
+    // Define the host connected for the kanban controller
     hostConnected() { }
+    // Define the host disconnected for the kanban controller
     hostDisconnected() { }
+    /**
+     * Get the items for the kanban controller
+     * @param {string} columnId
+     * @returns {KanbanItem[]}
+     * @memberof KanbanController
+     * @description This method is used to get the items for the kanban controller
+     * @example
+     * ```ts
+     * const items = kanban.getItems("1");
+     * ```
+     * @since 1.0.0
+     * @version 1.0.0
+     * @public
+     */
     getItems(columnId) {
         const column = Object.assign({}, this.host.data).columns.find((column) => column.id == columnId);
         if (!column) {
@@ -11,6 +28,21 @@ export class KanbanController {
         }
         return column.items;
     }
+    /**
+     * Insert an item for the kanban controller
+     * @param {string} columnId
+     * @param {KanbanItem} item
+     * @returns {KanbanItem}
+     * @memberof KanbanController
+     * @description This method is used to insert an item for the kanban controller
+     * @example
+     * ```ts
+     * const item = kanban.insertItem("1", { id: "1", content: "Hello" });
+     * ```
+     * @since 1.0.0
+     * @version 1.0.0
+     * @public
+     */
     insertItem(columnId, item) {
         const data = Object.assign({}, this.host.data);
         const column = data.columns.find((column) => column.id == columnId);
@@ -21,6 +53,21 @@ export class KanbanController {
         this._saveData(data);
         return item;
     }
+    /**
+     * Insert a column for the kanban controller
+     * @param {string} newTitle
+     * @param {string} columnId
+     * @returns {void}
+     * @memberof KanbanController
+     * @description This method is used to insert a column for the kanban controller
+     * @example
+     * ```ts
+     * kanban.insertColumn("Hello");
+     * ```
+     * @since 1.0.0
+     * @version 1.0.0
+     * @public
+     */
     updateColumn(columnId, newTitle) {
         const data = Object.assign({}, this.host.data);
         const [column] = data.columns.filter((column) => column.id == columnId);
@@ -30,6 +77,21 @@ export class KanbanController {
         column.title = newTitle === undefined ? column.title : newTitle;
         this._saveData(data);
     }
+    /**
+     * Delete a column for the kanban controller
+     * @param {string} itemId
+     * @param {{ content: string; columnId?: string; position?: number }} newProps
+     * @returns {void}
+     * @memberof KanbanController
+     * @description This method is used to delete a column for the kanban controller
+     * @example
+     * ```ts
+     * kanban.deleteColumn("1");
+     * ```
+     * @since 1.0.0
+     * @version 1.0.0
+     * @public
+     */
     updateItem(itemId, newProps) {
         const data = Object.assign({}, this.host.data);
         const [item, currentColumn] = (() => {
@@ -58,6 +120,20 @@ export class KanbanController {
         }
         this._saveData(data);
     }
+    /**
+     * Delete an item for the kanban controller
+     * @param {string} itemId
+     * @returns {void}
+     * @memberof KanbanController
+     * @description This method is used to delete an item for the kanban controller
+     * @example
+     * ```ts
+     * kanban.deleteItem("1");
+     * ```
+     * @since 1.0.0
+     * @version 1.0.0
+     * @public
+     */
     deleteItem(itemId) {
         const data = Object.assign({}, this.host.data);
         for (const column of data.columns) {
@@ -68,11 +144,30 @@ export class KanbanController {
         }
         this._saveData(data);
     }
+    /**
+     * Save the data for the kanban controller
+     * @param {KanbanBoardData} data
+     * @returns {void}
+     * @private
+     * @memberof KanbanController
+     * @description This method is used to save the data for the kanban controller
+     * @example
+     * ```ts
+     * this._saveData(data);
+     * ```
+     * @since 1.0.0
+     * @version 1.0.0
+     */
     _saveData(data) {
         this.host.textContent = JSON.stringify(data);
+        const oldData = this.host.data;
         this.host.data = data;
-        this.host.requestUpdate("data");
-        this.host.dispatchEvent(new CustomEvent("kanban-save", { detail: data, bubbles: true, composed: true }));
+        this.host.requestUpdate("data", oldData);
+        this.host.dispatchEvent(new CustomEvent("kanban-save", {
+            detail: data,
+            bubbles: true,
+            composed: true,
+        }));
     }
 }
 //# sourceMappingURL=kanban.js.map

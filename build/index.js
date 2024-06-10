@@ -9,10 +9,33 @@ import { customElement, property, query } from "lit/decorators.js";
 import { KanbanController } from "./controllers/kanban";
 import "./view/Column";
 let KanbanBoard = class KanbanBoard extends LitElement {
-    constructor() {
-        super(...arguments);
+    /**
+     * Constructor for the kanban board
+     * make sure we have some data to work with
+     * @param data
+     * @returns void
+     * @constructor
+     * @override
+     * @public
+     * @memberof KanbanBoard
+     * @since 1.0.0
+     * @version 1.0.0
+     * @example
+     * ```ts
+     * const kanban = new KanbanBoard({
+     *  columns: [
+     *     { id: "1", title: "Todo", items: [] },
+     *     { id: "2", title: "Doing", items: [] },
+     *     { id: "3", title: "Done", items: [] },
+     *   ],
+     * });
+     * ```
+     */
+    constructor(data) {
+        super();
         // Create the controller and store it
         this.kanbanAPI = new KanbanController(this);
+        // Define the properties for the kanban board
         this.data = {
             columns: [
                 { id: "1", title: "Todo", items: [] },
@@ -20,6 +43,11 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 { id: "3", title: "Done", items: [] },
             ],
         };
+        /**
+         * Update the item's column and position
+         * @param e CustomEvent
+         * @returns void
+         */
         this._itemDropHandler = (e) => {
             var _a, _b, _c;
             const dropzone = e.detail.dropzone;
@@ -33,11 +61,20 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 position: droppedIndex,
             });
         };
+        /**
+         * Update the item's content
+         * @param e CustomEvent
+         * @returns void
+         */
         this._itemUpdateHandler = (e) => {
             this.kanbanAPI.updateItem(e.detail.id, { content: e.detail.content });
         };
+        /**
+         * Delete the item
+         * @param e CustomEvent
+         * @returns void
+         */
         this._itemDeleteHandler = (e) => {
-            const confirmBtn = this._dialog.querySelector("#confirmBtn");
             // "Show the dialog" opens the <dialog> modally
             this._dialog.showModal();
             this._dialog.addEventListener("click", (e) => {
@@ -50,9 +87,9 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 }
             });
             // Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
-            confirmBtn.addEventListener("click", (event) => {
+            this._dialogConfirmButton.addEventListener("click", (event) => {
                 event.preventDefault(); // We don't want to submit this fake form
-                this._dialog.close(confirmBtn.value); // Have to send the select box value here.
+                this._dialog.close(this._dialogConfirmButton.value); // Have to send the select box value here.
             });
             // "Cancel" button closes the dialog without submitting because of [formmethod="dialog"], triggering a close event.
             this._dialog.addEventListener("close", (_event) => {
@@ -61,33 +98,68 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 }
             });
         };
+        /**
+         * Add a new item to the column
+         * @param e CustomEvent
+         * @returns void
+         */
         this._itemAddHandler = (e) => {
             this.kanbanAPI.insertItem(e.detail.columnId, e.detail.item);
         };
+        /**
+         * Update the column's title
+         * @param e CustomEvent
+         * @returns void
+         */
         this._columnUpdateHandler = (e) => {
             this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
         };
+        const defaultData = {
+            columns: [
+                { id: "1", title: "Todo", items: [] },
+                { id: "2", title: "Doing", items: [] },
+                { id: "3", title: "Done", items: [] },
+            ],
+        };
+        // set the data
+        this.data = data;
+        // if we don't have any data, we can't do anything
+        if (!data ||
+            !data.columns ||
+            !Array.isArray(data.columns) ||
+            data.columns.length === 0) {
+            // set default data
+            this.data = defaultData;
+        }
     }
+    /**
+     * Add event listeners
+     * @returns void
+     */
     connectedCallback() {
         super.connectedCallback();
-        window.addEventListener("kanban-item-drop", this._itemDropHandler);
-        window.addEventListener("kanban-item-update", this._itemUpdateHandler);
-        window.addEventListener("kanban-item-delete", this._itemDeleteHandler);
-        window.addEventListener("kanban-item-add", this._itemAddHandler);
-        window.addEventListener("kanban-column-update", this._columnUpdateHandler);
     }
+    /**
+     * Remove event listeners
+     * @returns void
+     */
     disconnectedCallback() {
         super.disconnectedCallback();
-        window.removeEventListener("kanban-item-drop", this._itemDropHandler);
-        window.removeEventListener("kanban-item-update", this._itemUpdateHandler);
-        window.removeEventListener("kanban-item-delete", this._itemDeleteHandler);
-        window.removeEventListener("kanban-item-add", this._itemAddHandler);
-        window.removeEventListener("kanban-column-update", this._columnUpdateHandler);
     }
+    /**
+     * Render the kanban board
+     * @returns html
+     */
     render() {
         var _a, _b;
-        console.log("rendering", { data: this.data });
-        return html ` <div class="kanban">
+        return html `<div
+      class="kanban"
+      @kanban-item-drop="${this._itemDropHandler}"
+      @kanban-item-update="${this._itemUpdateHandler}"
+      @kanban-item-delete="${this._itemDeleteHandler}"
+      @kanban-item-add="${this._itemAddHandler}"
+      @kanban-column-update="${this._columnUpdateHandler}"
+    >
       ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
             return html `<kanban-column
           id="${column.id}"
@@ -96,18 +168,19 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         ></kanban-column>`;
         })}
       <!-- A modal dialog containing a form -->
-      <dialog id="favDialog">
+      <dialog>
         <form>
           <p>Are you sure you want to delete this item?</p>
           <div>
             <button value="cancel" formmethod="dialog">Cancel</button>
-            <button id="confirmBtn" value="yes">Confirm</button>
+            <button value="yes">Confirm</button>
           </div>
         </form>
       </dialog>
     </div>`;
     }
 };
+// Define the styles for the kanban board
 KanbanBoard.styles = css `
     :host {
       display: block;
@@ -176,6 +249,9 @@ __decorate([
 __decorate([
     query("dialog")
 ], KanbanBoard.prototype, "_dialog", void 0);
+__decorate([
+    query("dialog button[value='yes']")
+], KanbanBoard.prototype, "_dialogConfirmButton", void 0);
 KanbanBoard = __decorate([
     customElement("kanban-board")
 ], KanbanBoard);

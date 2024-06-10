@@ -9,8 +9,30 @@ import { LitElement, css, html } from "lit";
 import "./Item";
 import "./DropZone";
 let Column = class Column extends LitElement {
+    /**
+     * Update the kanban column
+     * @param changedProperties
+     * @returns void
+     */
+    update(changedProperties) {
+        super.update(changedProperties);
+        if (changedProperties.has("title") &&
+            this._input.innerText !== this.title) {
+            this._input.innerText = this.title;
+        }
+    }
+    /**
+     * Render the kanban column
+     * @returns {ReturnType<LitElement["render"]>}
+     * @memberof Column
+     * @description This method is used to render the kanban column
+     */
     render() {
-        return html ` <div class="kanban__column-title" @blur="${this._blurHandler}" contenteditable >${this.title}</div>
+        return html ` <div
+        class="kanban__column-title"
+        @blur="${this._blurHandler}"
+        contenteditable
+      ></div>
       <div class="kanban__column-items">
         <kanban-dropzone></kanban-dropzone>
         ${this.items.map((item) => html `<kanban-item
@@ -23,6 +45,14 @@ let Column = class Column extends LitElement {
         + Add
       </button>`;
     }
+    /**
+     * Handle the blur event
+     * @private
+     * @returns {void}
+     * @memberof Column
+     * @description This method is used to handle the blur event
+     * @returns {void}
+     */
     _blurHandler() {
         const newTitle = this._input.innerText.trim();
         if (newTitle == this.title) {
@@ -34,6 +64,14 @@ let Column = class Column extends LitElement {
             detail: { id: this.id, title: newTitle },
         }));
     }
+    /**
+     * Handle the add item event
+     * @private
+     * @param {MouseEvent} _e
+     * @returns {void}
+     * @memberof Column
+     * @description This method is used to handle the add item event
+     */
     _addItem(_e) {
         const newItem = {
             id: String(Math.floor(Math.random() * 100000)),
@@ -46,6 +84,7 @@ let Column = class Column extends LitElement {
         }));
     }
 };
+// Define the styles for the kanban column
 Column.styles = css `
     :host {
       flex: 1;
