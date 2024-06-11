@@ -88,8 +88,33 @@ export class KanbanBoard extends LitElement {
     }
   `;
 
-  // Define the properties for the kanban board
-  @property({ reflect: true, type: Object })
+  /**
+   * Define the properties for the kanban board
+   * @type {KanbanBoardData}
+   * @memberof KanbanBoard
+   * @since 1.0.0
+   * @version 1.0.0
+   * @example
+   * ```ts
+   * const data = {
+   * columns: [
+   *  { id: "1", title: "Todo", items: [] },
+   * { id: "2", title: "Doing", items: [] },
+   * { id: "3", title: "Done", items: [] },
+   * ],
+   * };
+   * ```
+   * @public
+   * @readonly
+   */
+  @property({
+    reflect: true,
+    type: Object,
+    converter: {
+      toAttribute: (value) => encodeURIComponent(JSON.stringify(value)),
+      fromAttribute: (value) => JSON.parse(decodeURIComponent(String(value))),
+    },
+  })
   data: KanbanBoardData = {
     columns: [
       { id: "1", title: "Todo", items: [] },
@@ -135,7 +160,7 @@ export class KanbanBoard extends LitElement {
         { id: "2", title: "Doing", items: [] },
         { id: "3", title: "Done", items: [] },
       ],
-    }
+    };
     // set the data
     this.data = data;
 
@@ -173,20 +198,21 @@ export class KanbanBoard extends LitElement {
    */
   render() {
     return html`<div
-      class="kanban"
-      @kanban-item-drop="${this._itemDropHandler}"
-      @kanban-item-update="${this._itemUpdateHandler}"
-      @kanban-item-delete="${this._itemDeleteHandler}"
-      @kanban-item-add="${this._itemAddHandler}"
-      @kanban-column-update="${this._columnUpdateHandler}"
-    >
-      ${this.data?.columns?.map((column) => {
-        return html`<kanban-column
-          id="${column.id}"
-          title="${column.title}"
-          items="${JSON.stringify(column.items)}"
-        ></kanban-column>`;
-      })}
+        class="kanban"
+        @kanban-item-drop="${this._itemDropHandler}"
+        @kanban-item-update="${this._itemUpdateHandler}"
+        @kanban-item-delete="${this._itemDeleteHandler}"
+        @kanban-item-add="${this._itemAddHandler}"
+        @kanban-column-update="${this._columnUpdateHandler}"
+      >
+        ${this.data?.columns?.map((column) => {
+          return html`<kanban-column
+            id="${column.id}"
+            title="${column.title}"
+            items="${JSON.stringify(column.items)}"
+          ></kanban-column>`;
+        })}
+      </div>
       <!-- A modal dialog containing a form -->
       <dialog>
         <form>
@@ -196,8 +222,7 @@ export class KanbanBoard extends LitElement {
             <button value="yes">Confirm</button>
           </div>
         </form>
-      </dialog>
-    </div>`;
+      </dialog>`;
   }
 
   /**

@@ -15,6 +15,25 @@ export type KanbanBoardData = {
 export declare class KanbanBoard extends LitElement {
     private kanbanAPI;
     static styles: import("lit").CSSResult;
+    /**
+     * Define the properties for the kanban board
+     * @type {KanbanBoardData}
+     * @memberof KanbanBoard
+     * @since 1.0.0
+     * @version 1.0.0
+     * @example
+     * ```ts
+     * const data = {
+     * columns: [
+     *  { id: "1", title: "Todo", items: [] },
+     * { id: "2", title: "Doing", items: [] },
+     * { id: "3", title: "Done", items: [] },
+     * ],
+     * };
+     * ```
+     * @public
+     * @readonly
+     */
     data: KanbanBoardData;
     _dialog: HTMLDialogElement;
     _dialogConfirmButton: HTMLButtonElement;

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "concurrently \"tsc --watch\" \"es-dev-server --app-index index.html --node-resolve --watch --open\"",
     "build": "rimraf /dist && tsc && rollup -c",
+    "dev": "concurrently \"tsc --watch\" \"rollup -c --watch\"",
     "ts": "tsc"
   },
   "repository": {

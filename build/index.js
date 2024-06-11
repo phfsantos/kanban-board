@@ -35,7 +35,25 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         super();
         // Create the controller and store it
         this.kanbanAPI = new KanbanController(this);
-        // Define the properties for the kanban board
+        /**
+         * Define the properties for the kanban board
+         * @type {KanbanBoardData}
+         * @memberof KanbanBoard
+         * @since 1.0.0
+         * @version 1.0.0
+         * @example
+         * ```ts
+         * const data = {
+         * columns: [
+         *  { id: "1", title: "Todo", items: [] },
+         * { id: "2", title: "Doing", items: [] },
+         * { id: "3", title: "Done", items: [] },
+         * ],
+         * };
+         * ```
+         * @public
+         * @readonly
+         */
         this.data = {
             columns: [
                 { id: "1", title: "Todo", items: [] },
@@ -153,20 +171,21 @@ let KanbanBoard = class KanbanBoard extends LitElement {
     render() {
         var _a, _b;
         return html `<div
-      class="kanban"
-      @kanban-item-drop="${this._itemDropHandler}"
-      @kanban-item-update="${this._itemUpdateHandler}"
-      @kanban-item-delete="${this._itemDeleteHandler}"
-      @kanban-item-add="${this._itemAddHandler}"
-      @kanban-column-update="${this._columnUpdateHandler}"
-    >
-      ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
+        class="kanban"
+        @kanban-item-drop="${this._itemDropHandler}"
+        @kanban-item-update="${this._itemUpdateHandler}"
+        @kanban-item-delete="${this._itemDeleteHandler}"
+        @kanban-item-add="${this._itemAddHandler}"
+        @kanban-column-update="${this._columnUpdateHandler}"
+      >
+        ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
             return html `<kanban-column
-          id="${column.id}"
-          title="${column.title}"
-          items="${JSON.stringify(column.items)}"
-        ></kanban-column>`;
+            id="${column.id}"
+            title="${column.title}"
+            items="${JSON.stringify(column.items)}"
+          ></kanban-column>`;
         })}
+      </div>
       <!-- A modal dialog containing a form -->
       <dialog>
         <form>
@@ -176,8 +195,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
             <button value="yes">Confirm</button>
           </div>
         </form>
-      </dialog>
-    </div>`;
+      </dialog>`;
     }
 };
 // Define the styles for the kanban board
@@ -244,7 +262,14 @@ KanbanBoard.styles = css `
     }
   `;
 __decorate([
-    property({ reflect: true, type: Object })
+    property({
+        reflect: true,
+        type: Object,
+        converter: {
+            toAttribute: (value) => encodeURIComponent(JSON.stringify(value)),
+            fromAttribute: (value) => JSON.parse(decodeURIComponent(String(value))),
+        },
+    })
 ], KanbanBoard.prototype, "data", void 0);
 __decorate([
     query("dialog")
