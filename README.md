@@ -7,7 +7,7 @@ A simple kanban board to be used as an add-on to markdown files within markdown 
 The Kanban Board is an add-on to markdown files, allowing for a visual representation of tasks and progress directly within your repository. This project aims to integrate a Kanban-style board to enhance project management and workflow visualization. It can also be used in any website.
 
 ```html
-<kanban-board class="language-kanban-board" data="{"columns":[{"id":"1","title":"Todo","items":[{"id":"19767","content":"Fix bugs"}]},{"id":"2","title":"Doing","items":[{"id":"16079","content":"Basic design"}]},{"id":"3","title":"Done","items":[{"id":"25152","content":"Created repo"}]}]}"></kanban-board>
+<kanban-board class="language-kanban-board" data="%7B%22columns%22%3A%5B%7B%22id%22%3A%221%22%2C%22title%22%3A%22Todo%22%2C%22items%22%3A%5B%7B%22id%22%3A%2219767%22%2C%22content%22%3A%22Fix%20bugs%22%7D%5D%7D%2C%7B%22id%22%3A%222%22%2C%22title%22%3A%22Doing%22%2C%22items%22%3A%5B%7B%22id%22%3A%2216079%22%2C%22content%22%3A%22Basic%20design%22%7D%5D%7D%2C%7B%22id%22%3A%223%22%2C%22title%22%3A%22Done%22%2C%22items%22%3A%5B%7B%22id%22%3A%2225152%22%2C%22content%22%3A%22Created%20repo%22%7D%5D%7D%5D%7D"></kanban-board>
 ```
 
 ![](assets/20240611_051537_image.png)
