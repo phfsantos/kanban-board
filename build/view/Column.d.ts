@@ -40,3 +40,4 @@ export default class Column extends LitElement {
      */
     private _addItem;
 }
+//# sourceMappingURL=Column.d.ts.map

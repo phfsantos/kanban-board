@@ -20,14 +20,62 @@ The Kanban Board is an add-on to markdown files, allowing for a visual represent
 
 ## Getting Started
 
-To get started with the Kanban Board, clone this repository and follow the setup instructions below.
+### Installation via npm
 
-### Prerequisites
+Install the package in your project:
 
-- Node.js
+```bash
+npm install @phfsantos/kanban-board
+```
+
+Or with yarn:
+
+```bash
+yarn add @phfsantos/kanban-board
+```
+
+### Usage in Your Project
+
+Import and use the kanban-board web component in your application:
+
+```javascript
+import '@phfsantos/kanban-board';
+```
+
+Then use it in your HTML:
+
+```html
+<kanban-board 
+  class="language-kanban-board" 
+  data='{"columns":[{"id":"1","title":"Todo","items":[{"id":"19767","content":"Fix bugs"}]},{"id":"2","title":"Doing","items":[{"id":"16079","content":"Basic design"}]},{"id":"3","title":"Done","items":[{"id":"25152","content":"Created repo"}]}]}'>
+</kanban-board>
+```
+
+The `data` attribute accepts a JSON string with the following structure:
+
+```typescript
+{
+  columns: Array<{
+    id: string;
+    title: string;
+    items: Array<{
+      id: string;
+      content: string;
+    }>;
+  }>;
+}
+```
+
+### Development Setup
+
+To contribute or run the project locally:
+
+#### Prerequisites
+
+- Node.js >= 16.0.0
 - npm
 
-### Installation
+#### Installation
 
 1. Clone the repository:
 
@@ -45,15 +93,21 @@ To get started with the Kanban Board, clone this repository and follow the setup
    npm install
    ```
 
-### Usage
+#### Development
 
-To launch the Kanban Board, run the following command:
+To launch the development server:
 
 ```bash
 npm start
 ```
 
-This will open the board in your default web browser.
+This will open the board in your default web browser with hot reload.
+
+To build the project:
+
+```bash
+npm run build
+```
 
 ## Contributing
 

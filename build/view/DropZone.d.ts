@@ -50,3 +50,4 @@ export default class DropZone extends LitElement {
      */
     private _dropHandler;
 }
+//# sourceMappingURL=DropZone.d.ts.map

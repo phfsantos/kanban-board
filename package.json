@@ -1,13 +1,40 @@
 {
-  "name": "kanban-board",
+  "name": "@phfsantos/kanban-board",
   "version": "1.1.1",
-  "description": "A kanban board as an add-on to markdown files.",
-  "main": "dist/index.js",
+  "description": "A kanban board web component for markdown files built with Lit",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "dist/index.js"
+  ],
   "scripts": {
+    "clean": "rimraf dist build",
+    "build:ts": "tsc",
+    "build:rollup": "rollup -c",
+    "build:copy-types": "copyfiles -u 1 'build/**/*.d.ts' 'build/**/*.d.ts.map' dist",
+    "build": "npm run clean && npm run build:ts && npm run build:rollup && npm run build:copy-types",
     "start": "concurrently \"tsc --watch\" \"es-dev-server --app-index index.html --node-resolve --watch --open\"",
-    "build": "rimraf /dist && tsc && rollup -c",
     "dev": "concurrently \"tsc --watch\" \"rollup -c --watch\"",
-    "ts": "tsc"
+    "test:package": "npm pack --dry-run",
+    "prepublishOnly": "npm run build",
+    "preversion": "npm run build",
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
@@ -15,8 +42,13 @@
   },
   "keywords": [
     "kanban",
+    "web-component",
     "lit-element",
-    "lit"
+    "lit",
+    "markdown",
+    "task-board",
+    "custom-element",
+    "drag-and-drop"
   ],
   "author": "Pedro Santos",
   "license": "MIT",
@@ -24,17 +56,25 @@
     "url": "https://github.com/phfsantos/kanban-board/issues"
   },
   "homepage": "https://github.com/phfsantos/kanban-board#readme",
-  "dependencies": {
-    "lit": "^3.1.4"
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "peerDependencies": {
+    "lit": "^3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-strip": "^3.0.4",
     "@rollup/plugin-terser": "^0.4.4",
     "concurrently": "^8.2.2",
+    "copyfiles": "^2.4.1",
     "es-dev-server": "^1.55.1",
+    "lit": "^3.1.4",
     "rimraf": "^5.0.7",
     "rollup": "^4.18.0",
     "typescript": "^5.4.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

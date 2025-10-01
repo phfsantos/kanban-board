@@ -106,3 +106,4 @@ export declare class KanbanBoard extends LitElement {
      */
     private _columnUpdateHandler;
 }
+//# sourceMappingURL=index.d.ts.map

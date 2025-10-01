@@ -7,8 +7,11 @@ export default {
   output: {
     dir: 'dist/',
     format: 'es',
-    sourcemap: true
+    sourcemap: true,
+    preserveModules: true,
+    preserveModulesRoot: 'build'
   },
+  external: ['lit', 'lit/decorators.js', 'lit/directives/class-map.js'],
   plugins: [
     resolve(),
     // minifyHTML(),

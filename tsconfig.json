@@ -12,6 +12,7 @@
     "target": "es2017",
     "outDir": "build",
     "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "src"

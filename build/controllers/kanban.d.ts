@@ -103,3 +103,4 @@ export declare class KanbanController implements ReactiveController {
      */
     private _saveData;
 }
+//# sourceMappingURL=kanban.d.ts.map

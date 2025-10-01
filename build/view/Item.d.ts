@@ -63,3 +63,4 @@ export default class Item extends LitElement {
      */
     private _dropHandler;
 }
+//# sourceMappingURL=Item.d.ts.map

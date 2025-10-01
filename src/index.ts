@@ -130,6 +130,9 @@ export class KanbanBoard extends LitElement {
   @query("dialog button[value='yes']")
   _dialogConfirmButton: HTMLButtonElement;
 
+  // Store the ID of the item pending deletion
+  private _pendingDeleteId: string | null = null;
+
   /**
    * Constructor for the kanban board
    * make sure we have some data to work with
@@ -182,6 +185,10 @@ export class KanbanBoard extends LitElement {
    */
   connectedCallback() {
     super.connectedCallback();
+    // Setup dialog listeners once
+    this.updateComplete.then(() => {
+      this._setupDialogListeners();
+    });
   }
 
   /**
@@ -190,7 +197,87 @@ export class KanbanBoard extends LitElement {
    */
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    // Clean up dialog listeners
+    this._cleanupDialogListeners();
   }
+
+  /**
+   * Setup dialog event listeners once
+   * @returns void
+   * @private
+   */
+  private _setupDialogListeners() {
+    if (!this._dialog || !this._dialogConfirmButton) {
+      return;
+    }
+
+    this._dialog.addEventListener("click", this._handleDialogBackdropClick);
+    this._dialogConfirmButton.addEventListener(
+      "click",
+      this._handleDialogConfirm
+    );
+    this._dialog.addEventListener("close", this._handleDialogClose);
+  }
+
+  /**
+   * Cleanup dialog event listeners
+   * @returns void
+   * @private
+   */
+  private _cleanupDialogListeners() {
+    if (!this._dialog || !this._dialogConfirmButton) {
+      return;
+    }
+
+    this._dialog.removeEventListener("click", this._handleDialogBackdropClick);
+    this._dialogConfirmButton.removeEventListener(
+      "click",
+      this._handleDialogConfirm
+    );
+    this._dialog.removeEventListener("close", this._handleDialogClose);
+  }
+
+  /**
+   * Handle clicking on dialog backdrop to close
+   * @param e MouseEvent
+   * @returns void
+   * @private
+   */
+  private _handleDialogBackdropClick = (e: MouseEvent) => {
+    const dialogDimensions = this._dialog.getBoundingClientRect();
+    if (
+      e.clientX < dialogDimensions.left ||
+      e.clientX > dialogDimensions.right ||
+      e.clientY < dialogDimensions.top ||
+      e.clientY > dialogDimensions.bottom
+    ) {
+      this._dialog.close("cancel");
+    }
+  };
+
+  /**
+   * Handle dialog confirm button click
+   * @param event MouseEvent
+   * @returns void
+   * @private
+   */
+  private _handleDialogConfirm = (event: MouseEvent) => {
+    event.preventDefault(); // We don't want to submit this fake form
+    this._dialog.close(this._dialogConfirmButton.value); // Have to send the select box value here.
+  };
+
+  /**
+   * Handle dialog close event
+   * @param _event Event
+   * @returns void
+   * @private
+   */
+  private _handleDialogClose = (_event: Event) => {
+    if (this._dialog.returnValue === "yes" && this._pendingDeleteId) {
+      this.kanbanAPI.deleteItem(this._pendingDeleteId);
+      this._pendingDeleteId = null;
+    }
+  };
 
   /**
    * Render the kanban board
@@ -261,33 +348,10 @@ export class KanbanBoard extends LitElement {
    * @returns void
    */
   private _itemDeleteHandler = (e: CustomEvent) => {
-    // "Show the dialog" opens the <dialog> modally
+    // Store the ID of the item to be deleted
+    this._pendingDeleteId = e.detail.id;
+    // Show the confirmation dialog
     this._dialog.showModal();
-
-    this._dialog.addEventListener("click", (e) => {
-      const dialogDimensions = this._dialog.getBoundingClientRect();
-      if (
-        e.clientX < dialogDimensions.left ||
-        e.clientX > dialogDimensions.right ||
-        e.clientY < dialogDimensions.top ||
-        e.clientY > dialogDimensions.bottom
-      ) {
-        this._dialog.close("cancel");
-      }
-    });
-
-    // Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
-    this._dialogConfirmButton.addEventListener("click", (event) => {
-      event.preventDefault(); // We don't want to submit this fake form
-      this._dialog.close(this._dialogConfirmButton.value); // Have to send the select box value here.
-    });
-
-    // "Cancel" button closes the dialog without submitting because of [formmethod="dialog"], triggering a close event.
-    this._dialog.addEventListener("close", (_event) => {
-      if (this._dialog.returnValue === "yes") {
-        this.kanbanAPI.deleteItem(e.detail.id);
-      }
-    });
   };
 
   /**
