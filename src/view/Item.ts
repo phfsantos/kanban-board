@@ -157,13 +157,13 @@ export default class Item extends LitElement {
 
   /**
    * Handle the delete event
-   * @param e Event
+   * @param _e Event (unused)
    * @returns void
    * @private
    * @memberof Item
    * @description This method is used to handle the delete event
    */
-  private _deleteHandler(e: Event) {
+  private _deleteHandler(_e: Event) {
     this.dispatchEvent(
       new CustomEvent("kanban-item-delete", {
         bubbles: true,
@@ -182,6 +182,10 @@ export default class Item extends LitElement {
    * @description This method is used to handle the drag start event
    */
   private _dragStartHandler(e: DragEvent) {
+    if (!e.dataTransfer) {
+      return;
+    }
+    
     e.dataTransfer.setData("text/plain", this.id);
     
     // Set allowed effects

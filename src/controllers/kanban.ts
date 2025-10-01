@@ -31,8 +31,14 @@ export class KanbanController implements ReactiveController {
    * @public
    */
   getItems(columnId: string): KanbanItem[] {
-    const column = { ...this.host.data }.columns.find(
-      (column) => column.id == columnId
+    const data = { ...this.host.data };
+    
+    if (!data.columns) {
+      return [];
+    }
+    
+    const column = data.columns.find(
+      (column) => column.id === columnId
     );
 
     if (!column) {
@@ -59,7 +65,12 @@ export class KanbanController implements ReactiveController {
    */
   insertItem(columnId: string, item: KanbanItem) {
     const data = { ...this.host.data };
-    const column = data.columns.find((column) => column.id == columnId);
+    
+    if (!data.columns) {
+      throw new Error("No columns available.");
+    }
+    
+    const column = data.columns.find((column) => column.id === columnId);
 
     if (!column) {
       throw new Error("Column does not exist.");
@@ -89,7 +100,12 @@ export class KanbanController implements ReactiveController {
    */
   updateColumn(columnId: string, newTitle: string) {
     const data = { ...this.host.data };
-    const [column] = data.columns.filter((column) => column.id == columnId);
+    
+    if (!data.columns) {
+      throw new Error("No columns available.");
+    }
+    
+    const column = data.columns.find((column) => column.id === columnId);
 
     if (!column) {
       throw new Error("Column not found.");
@@ -120,27 +136,30 @@ export class KanbanController implements ReactiveController {
     newProps: { content?: string; columnId?: string; position?: number }
   ): void {
     const data = { ...this.host.data };
-    const [item, currentColumn] = (() => {
-      for (const column of data.columns) {
-        const item = column.items.find((item) => item.id == itemId);
+    
+    if (!data.columns) {
+      throw new Error("No columns available.");
+    }
+    
+    const result = this._findItemAndColumn(data.columns, itemId);
 
-        if (item) {
-          return [item, column];
-        }
-      }
-    })();
-
-    if (!item) {
+    if (!result) {
       throw new Error("Item not found.");
     }
+
+    const [item, currentColumn] = result;
 
     item.content =
       newProps.content === undefined ? item.content : newProps.content;
 
     // Update column and position
     if (newProps.columnId !== undefined && newProps.position !== undefined) {
+      if (!data.columns) {
+        throw new Error("No columns available.");
+      }
+      
       const targetColumn = data.columns.find(
-        (column) => column.id == newProps.columnId
+        (column) => column.id === newProps.columnId
       );
 
       if (!targetColumn) {
@@ -173,9 +192,14 @@ export class KanbanController implements ReactiveController {
    */
   deleteItem(itemId: string): void {
     const data = { ...this.host.data };
+    
+    if (!data.columns) {
+      console.warn('No columns available to delete from');
+      return;
+    }
 
     for (const column of data.columns) {
-      const item = column.items.find((item) => item.id == itemId);
+      const item = column.items.find((item) => item.id === itemId);
 
       if (item) {
         column.items.splice(column.items.indexOf(item), 1);
@@ -183,6 +207,28 @@ export class KanbanController implements ReactiveController {
     }
 
     this._saveData(data);
+  }
+
+  /**
+   * Find an item and its column
+   * @param columns KanbanColumn[]
+   * @param itemId string
+   * @returns [KanbanItem, KanbanColumn] | null
+   * @private
+   * @memberof KanbanController
+   * @description Helper method to safely find an item and its containing column
+   */
+  private _findItemAndColumn(
+    columns: import("..").KanbanColumn[],
+    itemId: string
+  ): [KanbanItem, import("..").KanbanColumn] | null {
+    for (const column of columns) {
+      const item = column.items.find((item) => item.id === itemId);
+      if (item) {
+        return [item, column];
+      }
+    }
+    return null;
   }
 
   /**

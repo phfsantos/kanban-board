@@ -110,7 +110,7 @@ export default class Column extends LitElement {
   private _blurHandler(): void {
     const newTitle = this._input.innerText.trim();
 
-    if (newTitle == this.title) {
+    if (newTitle === this.title) {
       return;
     }
 

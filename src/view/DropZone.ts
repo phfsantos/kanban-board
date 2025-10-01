@@ -108,13 +108,13 @@ export default class DropZone extends LitElement {
 
   /**
    * Handle the drag leave event
-   * @param {DragEvent} e
+   * @param {DragEvent} _e (unused)
    * @returns {void}
    * @private
    * @memberof DropZone
    * @description This method is used to handle the drag leave event
    */
-  private _dragLeaveHandler = (e: DragEvent): void => {
+  private _dragLeaveHandler = (_e: DragEvent): void => {
     this._dropzone.classList.remove("kanban__dropzone--active");
   };
 
@@ -128,6 +128,10 @@ export default class DropZone extends LitElement {
    */
   private _dropHandler = (e: DragEvent): void => {
     e.preventDefault();
+    
+    if (!e.dataTransfer) {
+      return;
+    }
     
     // Add dropping animation
     this._dropzone.classList.add('kanban__dropzone--dropping');

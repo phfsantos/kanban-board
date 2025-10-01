@@ -319,7 +319,13 @@ export class KanbanBoard extends LitElement {
    */
   private _itemDropHandler = (e: CustomEvent) => {
     const dropzone = e.detail.dropzone;
-    const columnId = dropzone.parentElement?.parentNode?.host?.id;
+    const columnId = this._getColumnIdFromDropzone(dropzone);
+    
+    if (!columnId) {
+      console.error('Could not determine column ID from dropzone');
+      return;
+    }
+    
     const dropZonesInColumn = Array.from(
       dropzone.parentElement.querySelectorAll("kanban-dropzone")
     );
@@ -335,6 +341,32 @@ export class KanbanBoard extends LitElement {
     // Add drop animation to the moved item
     this._animateDroppedItem(itemId);
   };
+
+  /**
+   * Safely extract column ID from dropzone element
+   * @param dropzone Element
+   * @returns string | null
+   * @private
+   */
+  private _getColumnIdFromDropzone(dropzone: Element): string | null {
+    const parent = dropzone.parentElement;
+    if (!parent) return null;
+    
+    const parentNode = parent.parentNode;
+    if (!parentNode) return null;
+    
+    // Check if parentNode is a ShadowRoot and has a host
+    if (!('host' in parentNode)) return null;
+    
+    const host = (parentNode as ShadowRoot).host;
+    if (!host) return null;
+    
+    // Check if host has an id property
+    if (!('id' in host)) return null;
+    
+    const id = (host as Element).id;
+    return id || null;
+  }
 
   /**
    * Animate the dropped item with a bounce effect
