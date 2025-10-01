@@ -124,6 +124,20 @@ export default class Column extends LitElement {
   }
 
   /**
+   * Generate a unique ID for kanban items
+   * Combines timestamp with random component to ensure uniqueness
+   * @private
+   * @returns {string} Unique ID in format: timestamp-randomString
+   * @memberof Column
+   * @description This method generates collision-resistant unique IDs
+   */
+  private _generateUniqueId(): string {
+    const timestamp = Date.now();
+    const randomComponent = Math.random().toString(36).substring(2, 11);
+    return `${timestamp}-${randomComponent}`;
+  }
+
+  /**
    * Handle the add item event
    * @private
    * @param {MouseEvent} _e
@@ -133,7 +147,7 @@ export default class Column extends LitElement {
    */
   private _addItem(_e: MouseEvent): void {
     const newItem = {
-      id: String(Math.floor(Math.random() * 100000)),
+      id: this._generateUniqueId(),
       content: "",
     };
 
