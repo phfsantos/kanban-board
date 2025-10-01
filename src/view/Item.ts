@@ -13,6 +13,12 @@ export default class Item extends LitElement {
   @query(".kanban__item-input")
   _input: HTMLDivElement;
 
+  @query(".kanban__item")
+  _itemElement: HTMLDivElement;
+
+  // Track drag preview element for cleanup
+  private _dragPreview: HTMLElement | null = null;
+
   /**
    * Constructor
    * @description This method is used to create an instance of the Item class
@@ -32,6 +38,33 @@ export default class Item extends LitElement {
 
     :host * {
       font-family: inherit;
+    }
+
+    .kanban__item {
+      transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kanban__item.dragging {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+
+    .kanban__item.dropping {
+      animation: drop-bounce 0.5s ease;
+    }
+
+    @keyframes drop-bounce {
+      0% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(0.98);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
     .kanban__item-input {
@@ -150,7 +183,78 @@ export default class Item extends LitElement {
    */
   private _dragStartHandler(e: DragEvent) {
     e.dataTransfer.setData("text/plain", this.id);
+    
+    // Set allowed effects
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Create custom drag preview
+    this._createDragPreview(e);
+    
+    // Add dragging class for visual feedback
+    this._itemElement.classList.add('dragging');
+    
+    // Listen for drag end to clean up
+    this.addEventListener('dragend', this._dragEndHandler, { once: true });
   }
+
+  /**
+   * Create a custom drag preview with enhanced styling
+   * @param e DragEvent
+   * @returns void
+   * @private
+   * @memberof Item
+   * @description Creates a styled clone of the item for drag preview
+   */
+  private _createDragPreview(e: DragEvent): void {
+    // Clone the item for preview
+    this._dragPreview = this._itemElement.cloneNode(true) as HTMLElement;
+    
+    // Style the preview
+    this._dragPreview.style.position = 'absolute';
+    this._dragPreview.style.top = '-1000px';
+    this._dragPreview.style.opacity = '0.8';
+    this._dragPreview.style.transform = 'rotate(2deg)';
+    this._dragPreview.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.3)';
+    this._dragPreview.style.width = `${this._itemElement.offsetWidth}px`;
+    this._dragPreview.style.pointerEvents = 'none';
+    
+    // Append to body temporarily
+    document.body.appendChild(this._dragPreview);
+    
+    // Set as drag image
+    if (e.dataTransfer) {
+      e.dataTransfer.setDragImage(this._dragPreview, 
+        this._itemElement.offsetWidth / 2, 
+        this._itemElement.offsetHeight / 2
+      );
+    }
+    
+    // Clean up preview after a short delay
+    setTimeout(() => {
+      if (this._dragPreview && this._dragPreview.parentNode) {
+        this._dragPreview.parentNode.removeChild(this._dragPreview);
+        this._dragPreview = null;
+      }
+    }, 0);
+  }
+
+  /**
+   * Handle the drag end event
+   * @returns void
+   * @private
+   * @memberof Item
+   * @description Cleans up dragging state after drag completes
+   */
+  private _dragEndHandler = (): void => {
+    // Remove dragging class
+    this._itemElement?.classList.remove('dragging');
+    
+    // Clean up preview if still exists
+    if (this._dragPreview && this._dragPreview.parentNode) {
+      this._dragPreview.parentNode.removeChild(this._dragPreview);
+      this._dragPreview = null;
+    }
+  };
 
   /**
    * Prevent the default drop behavior

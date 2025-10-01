@@ -331,7 +331,30 @@ export class KanbanBoard extends LitElement {
       columnId,
       position: droppedIndex,
     });
+    
+    // Add drop animation to the moved item
+    this._animateDroppedItem(itemId);
   };
+
+  /**
+   * Animate the dropped item with a bounce effect
+   * @param itemId string
+   * @returns void
+   * @private
+   */
+  private _animateDroppedItem(itemId: string): void {
+    // Wait for the DOM to update, then find and animate the item
+    setTimeout(() => {
+      const itemElement = this.shadowRoot?.querySelector(`#item-${itemId}`) as HTMLElement;
+      if (itemElement) {
+        itemElement.classList.add('dropping');
+        // Remove class after animation completes
+        setTimeout(() => {
+          itemElement.classList.remove('dropping');
+        }, 500);
+      }
+    }, 50);
+  }
 
   /**
    * Update the item's content
