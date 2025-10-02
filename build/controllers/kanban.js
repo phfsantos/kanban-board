@@ -22,7 +22,11 @@ export class KanbanController {
      * @public
      */
     getItems(columnId) {
-        const column = Object.assign({}, this.host.data).columns.find((column) => column.id == columnId);
+        const data = Object.assign({}, this.host.data);
+        if (!data.columns) {
+            return [];
+        }
+        const column = data.columns.find((column) => column.id === columnId);
         if (!column) {
             return [];
         }
@@ -45,7 +49,10 @@ export class KanbanController {
      */
     insertItem(columnId, item) {
         const data = Object.assign({}, this.host.data);
-        const column = data.columns.find((column) => column.id == columnId);
+        if (!data.columns) {
+            throw new Error("No columns available.");
+        }
+        const column = data.columns.find((column) => column.id === columnId);
         if (!column) {
             throw new Error("Column does not exist.");
         }
@@ -70,7 +77,10 @@ export class KanbanController {
      */
     updateColumn(columnId, newTitle) {
         const data = Object.assign({}, this.host.data);
-        const [column] = data.columns.filter((column) => column.id == columnId);
+        if (!data.columns) {
+            throw new Error("No columns available.");
+        }
+        const column = data.columns.find((column) => column.id === columnId);
         if (!column) {
             throw new Error("Column not found.");
         }
@@ -94,22 +104,22 @@ export class KanbanController {
      */
     updateItem(itemId, newProps) {
         const data = Object.assign({}, this.host.data);
-        const [item, currentColumn] = (() => {
-            for (const column of data.columns) {
-                const item = column.items.find((item) => item.id == itemId);
-                if (item) {
-                    return [item, column];
-                }
-            }
-        })();
-        if (!item) {
+        if (!data.columns) {
+            throw new Error("No columns available.");
+        }
+        const result = this._findItemAndColumn(data.columns, itemId);
+        if (!result) {
             throw new Error("Item not found.");
         }
+        const [item, currentColumn] = result;
         item.content =
             newProps.content === undefined ? item.content : newProps.content;
         // Update column and position
         if (newProps.columnId !== undefined && newProps.position !== undefined) {
-            const targetColumn = data.columns.find((column) => column.id == newProps.columnId);
+            if (!data.columns) {
+                throw new Error("No columns available.");
+            }
+            const targetColumn = data.columns.find((column) => column.id === newProps.columnId);
             if (!targetColumn) {
                 throw new Error("Target column not found.");
             }
@@ -136,13 +146,35 @@ export class KanbanController {
      */
     deleteItem(itemId) {
         const data = Object.assign({}, this.host.data);
+        if (!data.columns) {
+            console.warn('No columns available to delete from');
+            return;
+        }
         for (const column of data.columns) {
-            const item = column.items.find((item) => item.id == itemId);
+            const item = column.items.find((item) => item.id === itemId);
             if (item) {
                 column.items.splice(column.items.indexOf(item), 1);
             }
         }
         this._saveData(data);
+    }
+    /**
+     * Find an item and its column
+     * @param columns KanbanColumn[]
+     * @param itemId string
+     * @returns [KanbanItem, KanbanColumn] | null
+     * @private
+     * @memberof KanbanController
+     * @description Helper method to safely find an item and its containing column
+     */
+    _findItemAndColumn(columns, itemId) {
+        for (const column of columns) {
+            const item = column.items.find((item) => item.id === itemId);
+            if (item) {
+                return [item, column];
+            }
+        }
+        return null;
     }
     /**
      * Save the data for the kanban controller

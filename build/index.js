@@ -7,7 +7,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import { LitElement, html, css } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { KanbanController } from "./controllers/kanban";
-import "./view/Column";
+// Import and export child components to ensure they're included in bundle
+import Column from "./view/Column";
+import Item from "./view/Item";
+import DropZone from "./view/DropZone";
+// Export them so they're not tree-shaken
+export { Column, Item, DropZone };
 let KanbanBoard = class KanbanBoard extends LitElement {
     /**
      * Constructor for the kanban board
@@ -61,15 +66,57 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 { id: "3", title: "Done", items: [] },
             ],
         };
+        // Store the ID of the item pending deletion
+        this._pendingDeleteId = null;
+        /**
+         * Handle clicking on dialog backdrop to close
+         * @param e MouseEvent
+         * @returns void
+         * @private
+         */
+        this._handleDialogBackdropClick = (e) => {
+            const dialogDimensions = this._dialog.getBoundingClientRect();
+            if (e.clientX < dialogDimensions.left ||
+                e.clientX > dialogDimensions.right ||
+                e.clientY < dialogDimensions.top ||
+                e.clientY > dialogDimensions.bottom) {
+                this._dialog.close("cancel");
+            }
+        };
+        /**
+         * Handle dialog confirm button click
+         * @param event MouseEvent
+         * @returns void
+         * @private
+         */
+        this._handleDialogConfirm = (event) => {
+            event.preventDefault(); // We don't want to submit this fake form
+            this._dialog.close(this._dialogConfirmButton.value); // Have to send the select box value here.
+        };
+        /**
+         * Handle dialog close event
+         * @param _event Event
+         * @returns void
+         * @private
+         */
+        this._handleDialogClose = (_event) => {
+            if (this._dialog.returnValue === "yes" && this._pendingDeleteId) {
+                this.kanbanAPI.deleteItem(this._pendingDeleteId);
+                this._pendingDeleteId = null;
+            }
+        };
         /**
          * Update the item's column and position
          * @param e CustomEvent
          * @returns void
          */
         this._itemDropHandler = (e) => {
-            var _a, _b, _c;
             const dropzone = e.detail.dropzone;
-            const columnId = (_c = (_b = (_a = dropzone.parentElement) === null || _a === void 0 ? void 0 : _a.parentNode) === null || _b === void 0 ? void 0 : _b.host) === null || _c === void 0 ? void 0 : _c.id;
+            const columnId = this._getColumnIdFromDropzone(dropzone);
+            if (!columnId) {
+                console.error('Could not determine column ID from dropzone');
+                return;
+            }
             const dropZonesInColumn = Array.from(dropzone.parentElement.querySelectorAll("kanban-dropzone"));
             const droppedIndex = dropZonesInColumn.indexOf(dropzone);
             const itemId = e.detail.itemId;
@@ -78,6 +125,8 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 columnId,
                 position: droppedIndex,
             });
+            // Add drop animation to the moved item
+            this._animateDroppedItem(itemId);
         };
         /**
          * Update the item's content
@@ -93,28 +142,10 @@ let KanbanBoard = class KanbanBoard extends LitElement {
          * @returns void
          */
         this._itemDeleteHandler = (e) => {
-            // "Show the dialog" opens the <dialog> modally
+            // Store the ID of the item to be deleted
+            this._pendingDeleteId = e.detail.id;
+            // Show the confirmation dialog
             this._dialog.showModal();
-            this._dialog.addEventListener("click", (e) => {
-                const dialogDimensions = this._dialog.getBoundingClientRect();
-                if (e.clientX < dialogDimensions.left ||
-                    e.clientX > dialogDimensions.right ||
-                    e.clientY < dialogDimensions.top ||
-                    e.clientY > dialogDimensions.bottom) {
-                    this._dialog.close("cancel");
-                }
-            });
-            // Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
-            this._dialogConfirmButton.addEventListener("click", (event) => {
-                event.preventDefault(); // We don't want to submit this fake form
-                this._dialog.close(this._dialogConfirmButton.value); // Have to send the select box value here.
-            });
-            // "Cancel" button closes the dialog without submitting because of [formmethod="dialog"], triggering a close event.
-            this._dialog.addEventListener("close", (_event) => {
-                if (this._dialog.returnValue === "yes") {
-                    this.kanbanAPI.deleteItem(e.detail.id);
-                }
-            });
         };
         /**
          * Add a new item to the column
@@ -156,6 +187,10 @@ let KanbanBoard = class KanbanBoard extends LitElement {
      */
     connectedCallback() {
         super.connectedCallback();
+        // Setup dialog listeners once
+        this.updateComplete.then(() => {
+            this._setupDialogListeners();
+        });
     }
     /**
      * Remove event listeners
@@ -163,6 +198,34 @@ let KanbanBoard = class KanbanBoard extends LitElement {
      */
     disconnectedCallback() {
         super.disconnectedCallback();
+        // Clean up dialog listeners
+        this._cleanupDialogListeners();
+    }
+    /**
+     * Setup dialog event listeners once
+     * @returns void
+     * @private
+     */
+    _setupDialogListeners() {
+        if (!this._dialog || !this._dialogConfirmButton) {
+            return;
+        }
+        this._dialog.addEventListener("click", this._handleDialogBackdropClick);
+        this._dialogConfirmButton.addEventListener("click", this._handleDialogConfirm);
+        this._dialog.addEventListener("close", this._handleDialogClose);
+    }
+    /**
+     * Cleanup dialog event listeners
+     * @returns void
+     * @private
+     */
+    _cleanupDialogListeners() {
+        if (!this._dialog || !this._dialogConfirmButton) {
+            return;
+        }
+        this._dialog.removeEventListener("click", this._handleDialogBackdropClick);
+        this._dialogConfirmButton.removeEventListener("click", this._handleDialogConfirm);
+        this._dialog.removeEventListener("close", this._handleDialogClose);
     }
     /**
      * Render the kanban board
@@ -196,6 +259,51 @@ let KanbanBoard = class KanbanBoard extends LitElement {
           </div>
         </form>
       </dialog>`;
+    }
+    /**
+     * Safely extract column ID from dropzone element
+     * @param dropzone Element
+     * @returns string | null
+     * @private
+     */
+    _getColumnIdFromDropzone(dropzone) {
+        const parent = dropzone.parentElement;
+        if (!parent)
+            return null;
+        const parentNode = parent.parentNode;
+        if (!parentNode)
+            return null;
+        // Check if parentNode is a ShadowRoot and has a host
+        if (!('host' in parentNode))
+            return null;
+        const host = parentNode.host;
+        if (!host)
+            return null;
+        // Check if host has an id property
+        if (!('id' in host))
+            return null;
+        const id = host.id;
+        return id || null;
+    }
+    /**
+     * Animate the dropped item with a bounce effect
+     * @param itemId string
+     * @returns void
+     * @private
+     */
+    _animateDroppedItem(itemId) {
+        // Wait for the DOM to update, then find and animate the item
+        setTimeout(() => {
+            var _a;
+            const itemElement = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector(`#item-${itemId}`);
+            if (itemElement) {
+                itemElement.classList.add('dropping');
+                // Remove class after animation completes
+                setTimeout(() => {
+                    itemElement.classList.remove('dropping');
+                }, 500);
+            }
+        }, 50);
     }
 };
 // Define the styles for the kanban board

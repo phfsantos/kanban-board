@@ -23,13 +23,13 @@ let DropZone = class DropZone extends LitElement {
         };
         /**
          * Handle the drag leave event
-         * @param {DragEvent} e
+         * @param {DragEvent} _e (unused)
          * @returns {void}
          * @private
          * @memberof DropZone
          * @description This method is used to handle the drag leave event
          */
-        this._dragLeaveHandler = (e) => {
+        this._dragLeaveHandler = (_e) => {
             this._dropzone.classList.remove("kanban__dropzone--active");
         };
         /**
@@ -42,15 +42,28 @@ let DropZone = class DropZone extends LitElement {
          */
         this._dropHandler = (e) => {
             e.preventDefault();
-            this._dropzone.classList.remove("kanban__dropzone--active");
+            if (!e.dataTransfer) {
+                return;
+            }
+            // Add dropping animation
+            this._dropzone.classList.add('kanban__dropzone--dropping');
+            this._dropzone.classList.remove('kanban__dropzone--active');
+            // Get the item ID
+            const itemId = e.dataTransfer.getData("text/plain");
+            // Dispatch drop event
             this.dispatchEvent(new CustomEvent("kanban-item-drop", {
                 bubbles: true,
                 composed: true,
                 detail: {
                     dropzone: this,
-                    itemId: e.dataTransfer.getData("text/plain"),
+                    itemId: itemId,
                 },
             }));
+            // Remove dropping class after animation
+            setTimeout(() => {
+                var _a;
+                (_a = this._dropzone) === null || _a === void 0 ? void 0 : _a.classList.remove('kanban__dropzone--dropping');
+            }, 300);
         };
     }
     /**
@@ -106,6 +119,34 @@ DropZone.styles = css `
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.25);
+      border-radius: 5px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        background: rgba(0, 0, 0, 0.25);
+        transform: scale(1);
+      }
+      50% {
+        background: rgba(66, 153, 225, 0.4);
+        transform: scale(1.02);
+      }
+    }
+
+    .kanban__dropzone--dropping .kanban__dropzone-content {
+      animation: drop-flash 0.3s ease;
+    }
+
+    @keyframes drop-flash {
+      0% {
+        background: rgba(66, 153, 225, 0.6);
+        transform: scale(1.05);
+      }
+      100% {
+        background: rgba(66, 153, 225, 0.2);
+        transform: scale(1);
+      }
     }
   `;
 __decorate([

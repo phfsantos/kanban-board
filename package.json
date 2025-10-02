@@ -1,6 +1,6 @@
 {
   "name": "@phfsantos/kanban-board",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A kanban board web component for markdown files built with Lit",
   "type": "module",
   "main": "./dist/index.js",
@@ -29,6 +29,7 @@
     "build:rollup": "rollup -c",
     "build:copy-types": "copyfiles -u 1 'build/**/*.d.ts' 'build/**/*.d.ts.map' dist",
     "build": "npm run clean && npm run build:ts && npm run build:rollup && npm run build:copy-types",
+    "build:demo": "rollup -c rollup.demo.config.mjs",
     "start": "concurrently \"tsc --watch\" \"es-dev-server --app-index index.html --node-resolve --watch --open\"",
     "dev": "concurrently \"tsc --watch\" \"rollup -c --watch\"",
     "test:package": "npm pack --dry-run",

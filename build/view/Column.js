@@ -55,7 +55,7 @@ let Column = class Column extends LitElement {
      */
     _blurHandler() {
         const newTitle = this._input.innerText.trim();
-        if (newTitle == this.title) {
+        if (newTitle === this.title) {
             return;
         }
         this.dispatchEvent(new CustomEvent("kanban-column-update", {
@@ -63,6 +63,19 @@ let Column = class Column extends LitElement {
             composed: true,
             detail: { id: this.id, title: newTitle },
         }));
+    }
+    /**
+     * Generate a unique ID for kanban items
+     * Combines timestamp with random component to ensure uniqueness
+     * @private
+     * @returns {string} Unique ID in format: timestamp-randomString
+     * @memberof Column
+     * @description This method generates collision-resistant unique IDs
+     */
+    _generateUniqueId() {
+        const timestamp = Date.now();
+        const randomComponent = Math.random().toString(36).substring(2, 11);
+        return `${timestamp}-${randomComponent}`;
     }
     /**
      * Handle the add item event
@@ -74,7 +87,7 @@ let Column = class Column extends LitElement {
      */
     _addItem(_e) {
         const newItem = {
-            id: String(Math.floor(Math.random() * 100000)),
+            id: this._generateUniqueId(),
             content: "",
         };
         this.dispatchEvent(new CustomEvent("kanban-item-add", {
@@ -125,7 +138,25 @@ __decorate([
     property()
 ], Column.prototype, "title", void 0);
 __decorate([
-    property({ type: Array, reflect: true })
+    property({
+        type: Array,
+        reflect: true,
+        converter: {
+            fromAttribute: (value) => {
+                if (!value)
+                    return [];
+                try {
+                    return JSON.parse(value);
+                }
+                catch (_a) {
+                    return [];
+                }
+            },
+            toAttribute: (value) => {
+                return JSON.stringify(value);
+            }
+        }
+    })
 ], Column.prototype, "items", void 0);
 __decorate([
     query(".kanban__column-title")

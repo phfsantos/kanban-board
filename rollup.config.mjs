@@ -1,9 +1,8 @@
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
-import strip from '@rollup/plugin-strip';
 
 export default {
-  input: ['build/index.js'],
+  input: ['build/index.js', 'build/controllers/kanban.js', 'build/view/Column.js', 'build/view/Item.js', 'build/view/DropZone.js'],
   output: {
     dir: 'dist/',
     format: 'es',
@@ -15,9 +14,6 @@ export default {
   plugins: [
     resolve(),
     // minifyHTML(),
-    terser(),
-    strip({
-      functions: ['console.log']
-    })
+    terser()
   ]
 };

@@ -12,7 +12,23 @@ export default class Column extends LitElement {
   id: string;
   @property()
   title: string;
-  @property({ type: Array, reflect: true })
+  @property({ 
+    type: Array, 
+    reflect: true,
+    converter: {
+      fromAttribute: (value: string | null) => {
+        if (!value) return [];
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [];
+        }
+      },
+      toAttribute: (value: KanbanItem[]) => {
+        return JSON.stringify(value);
+      }
+    }
+  })
   items: KanbanItem[];
 
   // Define the styles for the kanban column

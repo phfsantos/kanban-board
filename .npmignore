@@ -1,0 +1,36 @@
+# Source files
+src/
+build/
+
+# Development files
+node_modules/
+*.log
+.DS_Store
+
+# Config files
+tsconfig.json
+rollup.config.mjs
+.github/
+.vscode/
+
+# Testing
+test/
+*.test.ts
+coverage/
+
+# Documentation
+docs/
+issues/
+features/
+*.md
+!README.md
+!LICENSE
+
+# Assets for development only
+assets/
+index.html
+
+# Analysis files
+ANALYSIS-SUMMARY.md
+IMPLEMENTATION-GUIDE.md
+README-ANALYSIS.md

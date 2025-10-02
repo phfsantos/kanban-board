@@ -2,7 +2,13 @@ import { LitElement, html, css } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { KanbanController } from "./controllers/kanban";
 
-import "./view/Column";
+// Import and export child components to ensure they're included in bundle
+import Column from "./view/Column";
+import Item from "./view/Item";
+import DropZone from "./view/DropZone";
+
+// Export them so they're not tree-shaken
+export { Column, Item, DropZone };
 
 export type KanbanItem = {
   id: string;
