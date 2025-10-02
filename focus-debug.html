@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Management Debug - Kanban Board</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-panel h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .debug-log {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .debug-log div {
+            margin: 2px 0;
+            padding: 2px 4px;
+        }
+        .debug-log .info {
+            color: #0066cc;
+        }
+        .debug-log .success {
+            color: #00aa00;
+            font-weight: bold;
+        }
+        .debug-log .error {
+            color: #cc0000;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        kanban-board {
+            display: block;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
+            "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3/decorators.js/+esm",
+            "lit/directives/class-map.js": "https://cdn.jsdelivr.net/npm/lit@3/directives/class-map.js/+esm"
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>🔍 Focus Management Debug Tool</h1>
+    
+    <div class="instructions">
+        <h3>Debug Instructions:</h3>
+        <ul>
+            <li><strong>Keyboard Movement:</strong> Click on an item, then press <kbd>Shift+↑</kbd>, <kbd>Shift+↓</kbd>, <kbd>Shift+←</kbd>, or <kbd>Shift+→</kbd></li>
+            <li><strong>Drag & Drop:</strong> Drag an item to a new position</li>
+            <li><strong>Check Console:</strong> Open browser DevTools (F12) and watch the Console tab</li>
+            <li><strong>Check Debug Log:</strong> See custom debug messages below</li>
+        </ul>
+    </div>
+
+    <div class="debug-panel">
+        <h2>Debug Log</h2>
+        <button onclick="clearDebugLog()">Clear Log</button>
+        <button onclick="logCurrentFocus()">Log Current Focus</button>
+        <button onclick="inspectItems()">Inspect All Items</button>
+        <div id="debugLog" class="debug-log"></div>
+    </div>
+
+    <kanban-board id="board" data="%7B%22columns%22%3A%5B%7B%22id%22%3A%221%22%2C%22title%22%3A%22Todo%22%2C%22items%22%3A%5B%5D%7D%2C%7B%22id%22%3A%222%22%2C%22title%22%3A%22Doing%22%2C%22items%22%3A%5B%5D%7D%2C%7B%22id%22%3A%223%22%2C%22title%22%3A%22Done%22%2C%22items%22%3A%5B%5D%7D%5D%7D"></kanban-board>
+
+    <script type="module">
+        import {KanbanBoard} from './dist/index.js';
+
+        // Override console.log to capture messages
+        const originalLog = console.log;
+        const debugLogEl = document.getElementById('debugLog');
+        
+        function addDebugMessage(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            debugLogEl.appendChild(div);
+            debugLogEl.scrollTop = debugLogEl.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' ');
+            
+            if (message.includes('_focusItem')) {
+                if (message.includes('Found item!')) {
+                    addDebugMessage(message, 'success');
+                } else if (message.includes('not found')) {
+                    addDebugMessage(message, 'error');
+                } else {
+                    addDebugMessage(message, 'info');
+                }
+            }
+        };
+
+        // Track focus changes
+        document.addEventListener('focusin', (e) => {
+            const target = e.target;
+            let info = `Focus: ${target.tagName}`;
+            if (target.id) info += ` #${target.id}`;
+            if (target.className) info += ` .${target.className}`;
+            addDebugMessage(info, 'success');
+        });
+
+        // Sample data
+        const board = document.getElementById('board');
+        board.data = {
+            columns: [
+                {
+                    id: 'todo',
+                    title: 'To Do',
+                    items: [
+                        { id: 'item-1', content: 'Task 1' },
+                        { id: 'item-2', content: 'Task 2' }
+                    ]
+                },
+                {
+                    id: 'in-progress',
+                    title: 'In Progress',
+                    items: [
+                        { id: 'item-3', content: 'Task 3' }
+                    ]
+                },
+                {
+                    id: 'done',
+                    title: 'Done',
+                    items: []
+                }
+            ]
+        };
+
+        window.clearDebugLog = function() {
+            debugLogEl.innerHTML = '';
+            addDebugMessage('Debug log cleared', 'info');
+        };
+
+        window.logCurrentFocus = function() {
+            const focused = document.activeElement;
+            addDebugMessage(`Active element: ${focused.tagName}${focused.id ? ' #' + focused.id : ''}`, 'info');
+            
+            if (focused.shadowRoot) {
+                const shadowFocused = focused.shadowRoot.activeElement;
+                if (shadowFocused) {
+                    addDebugMessage(`  Shadow root active: ${shadowFocused.tagName}${shadowFocused.id ? ' #' + shadowFocused.id : ''}`, 'info');
+                }
+            }
+        };
+
+        window.inspectItems = function() {
+            addDebugMessage('=== Inspecting all items ===', 'info');
+            const boardEl = document.getElementById('board');
+            const columns = boardEl.shadowRoot.querySelectorAll('kanban-column');
+            addDebugMessage(`Found ${columns.length} columns`, 'info');
+            
+            columns.forEach((col, colIndex) => {
+                const items = col.shadowRoot.querySelectorAll('kanban-item');
+                addDebugMessage(`  Column ${colIndex}: ${items.length} items`, 'info');
+                
+                items.forEach((item, itemIndex) => {
+                    addDebugMessage(`    Item ${itemIndex}: id="${item.id}" content="${item.content}"`, 'info');
+                });
+            });
+        };
+
+        addDebugMessage('Debug tool initialized. Try moving items!', 'success');
+    </script>
+</body>
+</html>
