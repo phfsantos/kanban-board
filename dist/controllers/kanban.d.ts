@@ -98,6 +98,15 @@ export declare class KanbanController implements ReactiveController {
      */
     private _findItemAndColumn;
     /**
+     * Find an item and its column (public API)
+     * Helper method to safely find items with proper null checks
+     * @param {string} itemId
+     * @returns {[KanbanItem, import("..").KanbanColumn] | null}
+     * @public
+     * @memberof KanbanController
+     */
+    findItemAndColumn(itemId: string): [KanbanItem, import("..").KanbanColumn] | null;
+    /**
      * Save the data for the kanban controller
      * @param {KanbanBoardData} data
      * @returns {void}

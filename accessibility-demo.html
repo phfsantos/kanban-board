@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Kanban Board Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .instructions h2 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        
+        .instructions ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+        }
+        
+        .instructions kbd {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .keyboard-shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .shortcut-group {
+            background: #f8f8f8;
+            padding: 12px;
+            border-radius: 4px;
+        }
+        
+        .shortcut-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        kanban-board {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+    <script type="module" src="./dist/index.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
+            "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3/decorators.js/+esm",
+            "lit/directives/class-map.js": "https://cdn.jsdelivr.net/npm/lit@3/directives/class-map.js/+esm"
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>Accessible Kanban Board</h1>
+    <p>This demo showcases the comprehensive accessibility improvements including keyboard navigation and screen reader support.</p>
+    
+    <div class="instructions">
+        <h2>🎹 Keyboard Navigation Guide</h2>
+        
+        <div class="keyboard-shortcuts">
+            <div class="shortcut-group">
+                <h3>General Navigation</h3>
+                <ul>
+                    <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> - Navigate between elements</li>
+                    <li><kbd>Enter</kbd> - Activate buttons / Edit items</li>
+                    <li><kbd>Escape</kbd> - Exit edit mode</li>
+                </ul>
+            </div>
+            
+            <div class="shortcut-group">
+                <h3>Item Actions</h3>
+                <ul>
+                    <li><kbd>Shift+Delete</kbd> - Delete item</li>
+                    <li><kbd>Shift+↑</kbd> - Move item up in column</li>
+                    <li><kbd>Shift+↓</kbd> - Move item down in column</li>
+                    <li><kbd>Shift+←</kbd> - Move to previous column</li>
+                    <li><kbd>Shift+→</kbd> - Move to next column</li>
+                    <li>Or use <kbd>Tab</kbd> to arrow buttons</li>
+                </ul>
+            </div>
+            
+            <div class="shortcut-group">
+                <h3>Screen Reader Features</h3>
+                <ul>
+                    <li>All elements have descriptive labels</li>
+                    <li>Actions announced in real-time</li>
+                    <li>Column and item counts read aloud</li>
+                    <li>Edit mode clearly announced</li>
+                </ul>
+            </div>
+            
+            <div class="shortcut-group">
+                <h3>Visual Features</h3>
+                <ul>
+                    <li>Focus indicators on all interactive elements</li>
+                    <li>Arrow buttons in tab order</li>
+                    <li>Delete button accessible via Tab</li>
+                    <li>Works alongside drag & drop</li>
+                    <li>Inherits website colors automatically</li>
+                </ul>
+            </div>
+        </div>
+        
+        <p style="margin-top: 20px;"><strong>Try it:</strong> Press <kbd>Tab</kbd> to navigate through all controls including arrow buttons, or use <kbd>Shift+Arrow</kbd> keys when an item is focused!</p>
+    </div>
+    
+    <kanban-board id="board"></kanban-board>
+    
+    <script>
+        // Initialize the board with some sample data
+        const board = document.getElementById('board');
+        board.data = {
+            columns: [
+                {
+                    id: '1',
+                    title: 'Todo',
+                    items: [
+                        { id: '1-1', content: 'Test keyboard navigation with Tab key' },
+                        { id: '1-2', content: 'Try pressing Enter to edit this item' },
+                        { id: '1-3', content: 'Press Escape to exit edit mode' },
+                        { id: '1-4', content: 'Use Shift+Delete to delete items' }
+                    ]
+                },
+                {
+                    id: '2',
+                    title: 'In Progress',
+                    items: [
+                        { id: '2-1', content: 'Use arrow buttons to move items' },
+                        { id: '2-2', content: 'Hover over items to see arrow buttons' },
+                        { id: '2-3', content: 'Press ↑ or ↓ to move within column' }
+                    ]
+                },
+                {
+                    id: '3',
+                    title: 'Done',
+                    items: [
+                        { id: '3-1', content: 'Press ← or → to move between columns' },
+                        { id: '3-2', content: 'All features work with screen readers' },
+                        { id: '3-3', content: 'Focus indicators show current position' }
+                    ]
+                }
+            ]
+        };
+        
+        // Log accessibility events for demonstration
+        board.addEventListener('kanban-item-move', (e) => {
+            console.log('🎹 Keyboard navigation used:', e.detail);
+        });
+        
+        board.addEventListener('kanban-item-update', (e) => {
+            console.log('✏️ Item updated:', e.detail);
+        });
+        
+        board.addEventListener('kanban-item-delete', (e) => {
+            console.log('🗑️ Item deleted:', e.detail);
+        });
+    </script>
+</body>
+</html>

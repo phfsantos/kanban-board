@@ -2,6 +2,8 @@ import { LitElement, PropertyValueMap } from "lit";
 export default class Item extends LitElement {
     id: string;
     content: string;
+    columnId: string;
+    columnTitle: string;
     _input: HTMLDivElement;
     _itemElement: HTMLDivElement;
     private _dragPreview;
@@ -81,5 +83,61 @@ export default class Item extends LitElement {
      * @returns void
      */
     private _dropHandler;
+    /**
+     * Handle keyboard events on input
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {void}
+     */
+    private _handleItemKeydown;
+    /**
+     * Handle keyboard events on input
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {void}
+     */
+    private _handleInputKeydown;
+    /**
+     * Handle keyboard events on delete button
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {void}
+     */
+    private _handleDeleteKeydown;
+    /**
+     * Handle keyboard events on action buttons
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {void}
+     */
+    private _handleButtonKeydown;
+    /**
+     * Move item up within current column
+     * @private
+     * @param {Event} e
+     * @returns {void}
+     */
+    private _moveUp;
+    /**
+     * Move item down within current column
+     * @private
+     * @param {Event} e
+     * @returns {void}
+     */
+    private _moveDown;
+    /**
+     * Move item to previous column
+     * @private
+     * @param {Event} e
+     * @returns {void}
+     */
+    private _moveLeft;
+    /**
+     * Move item to next column
+     * @private
+     * @param {Event} e
+     * @returns {void}
+     */
+    private _moveRight;
 }
 //# sourceMappingURL=Item.d.ts.map

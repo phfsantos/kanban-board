@@ -1,5 +1,10 @@
 import{css as e,LitElement as a,html as n}from"lit";import{query as r,customElement as t}from"lit/decorators.js";var o=function(e,a,n,r){var t,o=arguments.length,d=o<3?a:null===r?r=Object.getOwnPropertyDescriptor(a,n):r;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)d=Reflect.decorate(e,a,n,r);else for(var s=e.length-1;s>=0;s--)(t=e[s])&&(d=(o<3?t(d):o>3?t(a,n,d):t(a,n))||d);return o>3&&d&&Object.defineProperty(a,n,d),d};let d=class extends a{constructor(){super(...arguments),this._dragOverHandler=e=>{e.preventDefault(),this._dropzone.classList.add("kanban__dropzone--active")},this._dragLeaveHandler=e=>{this._dropzone.classList.remove("kanban__dropzone--active")},this._dropHandler=e=>{if(e.preventDefault(),!e.dataTransfer)return;this._dropzone.classList.add("kanban__dropzone--dropping"),this._dropzone.classList.remove("kanban__dropzone--active");const a=e.dataTransfer.getData("text/plain");this.dispatchEvent(new CustomEvent("kanban-item-drop",{bubbles:!0,composed:!0,detail:{dropzone:this,itemId:a}})),setTimeout((()=>{var e;null===(e=this._dropzone)||void 0===e||e.classList.remove("kanban__dropzone--dropping")}),300)}}render(){return n`
-      <div class="kanban__dropzone">
+      <div 
+        class="kanban__dropzone"
+        role="button"
+        aria-label="Drop zone for items"
+        tabindex="-1"
+      >
         <div class="kanban__dropzone-content"></div>
       </div>
     `}connectedCallback(){super.connectedCallback(),this.addEventListener("dragover",this._dragOverHandler),this.addEventListener("dragleave",this._dragLeaveHandler),this.addEventListener("drop",this._dropHandler)}disconnectedCallback(){super.disconnectedCallback(),this.removeEventListener("dragover",this._dragOverHandler),this.removeEventListener("dragleave",this._dragLeaveHandler),this.removeEventListener("drop",this._dropHandler)}};d.styles=e`

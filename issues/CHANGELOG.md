@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Accessibility**: Comprehensive WCAG 2.1 Level AA compliance (ISSUE-007)
+  - ARIA labels and roles on all interactive elements
+  - Full keyboard navigation support (Tab, Enter, Escape, Shift+Delete)
+  - Keyboard alternative to drag & drop (arrow buttons: ↑ ↓ ← →)
+  - Screen reader support with live region announcements
+  - Focus management with visible focus indicators
+  - Semantic HTML structure with proper roles
+- Public `findItemAndColumn()` method in KanbanController API
+
 ### Changed
 - Improved npm package configuration for better distribution
 - Fixed build output paths to use `dist/` consistently

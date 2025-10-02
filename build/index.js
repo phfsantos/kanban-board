@@ -163,6 +163,64 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         this._columnUpdateHandler = (e) => {
             this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
         };
+        /**
+         * Handle keyboard-based item movement
+         * @param e CustomEvent
+         * @returns void
+         * @private
+         */
+        this._itemMoveHandler = (e) => {
+            const { id, direction } = e.detail;
+            const result = this.kanbanAPI.findItemAndColumn(id);
+            if (!result) {
+                console.error('Item not found:', id);
+                return;
+            }
+            const [_item, column] = result;
+            const columns = this.data.columns;
+            if (!columns)
+                return;
+            const columnIndex = columns.findIndex(col => col.id === column.id);
+            const itemIndex = column.items.findIndex((i) => i.id === id);
+            if (columnIndex === -1 || itemIndex === -1)
+                return;
+            switch (direction) {
+                case 'up':
+                    if (itemIndex > 0) {
+                        this.kanbanAPI.updateItem(id, {
+                            columnId: column.id,
+                            position: itemIndex - 1
+                        });
+                    }
+                    break;
+                case 'down':
+                    if (itemIndex < column.items.length - 1) {
+                        this.kanbanAPI.updateItem(id, {
+                            columnId: column.id,
+                            position: itemIndex + 1
+                        });
+                    }
+                    break;
+                case 'left':
+                    if (columnIndex > 0) {
+                        const prevColumn = columns[columnIndex - 1];
+                        this.kanbanAPI.updateItem(id, {
+                            columnId: prevColumn.id,
+                            position: prevColumn.items.length
+                        });
+                    }
+                    break;
+                case 'right':
+                    if (columnIndex < columns.length - 1) {
+                        const nextColumn = columns[columnIndex + 1];
+                        this.kanbanAPI.updateItem(id, {
+                            columnId: nextColumn.id,
+                            position: nextColumn.items.length
+                        });
+                    }
+                    break;
+            }
+        };
         const defaultData = {
             columns: [
                 { id: "1", title: "Todo", items: [] },
@@ -235,10 +293,13 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         var _a, _b;
         return html `<div
         class="kanban"
+        role="region"
+        aria-label="Kanban board"
         @kanban-item-drop="${this._itemDropHandler}"
         @kanban-item-update="${this._itemUpdateHandler}"
         @kanban-item-delete="${this._itemDeleteHandler}"
         @kanban-item-add="${this._itemAddHandler}"
+        @kanban-item-move="${this._itemMoveHandler}"
         @kanban-column-update="${this._columnUpdateHandler}"
       >
         ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
@@ -250,12 +311,25 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         })}
       </div>
       <!-- A modal dialog containing a form -->
-      <dialog>
+      <dialog 
+        role="alertdialog"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-desc"
+        aria-modal="true"
+      >
         <form>
-          <p>Are you sure you want to delete this item?</p>
+          <h2 id="dialog-title" style="margin-top: 0; font-size: 1.2em;">Confirm Delete</h2>
+          <p id="dialog-desc">Are you sure you want to delete this item? This action cannot be undone.</p>
           <div>
-            <button value="cancel" formmethod="dialog">Cancel</button>
-            <button value="yes">Confirm</button>
+            <button 
+              value="cancel" 
+              formmethod="dialog"
+              aria-label="Cancel deletion"
+            >Cancel</button>
+            <button 
+              value="yes"
+              aria-label="Confirm deletion"
+            >Confirm</button>
           </div>
         </form>
       </dialog>`;

@@ -156,5 +156,12 @@ export declare class KanbanBoard extends LitElement {
      * @returns void
      */
     private _columnUpdateHandler;
+    /**
+     * Handle keyboard-based item movement
+     * @param e CustomEvent
+     * @returns void
+     * @private
+     */
+    private _itemMoveHandler;
 }
 //# sourceMappingURL=index.d.ts.map

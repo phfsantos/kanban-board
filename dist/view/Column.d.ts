@@ -8,6 +8,7 @@ export default class Column extends LitElement {
     items: KanbanItem[];
     static styles: import("lit").CSSResult;
     _input: HTMLDivElement;
+    private _statusMessage;
     /**
      * Update the kanban column
      * @param changedProperties
@@ -39,6 +40,27 @@ export default class Column extends LitElement {
      * @description This method generates collision-resistant unique IDs
      */
     private _generateUniqueId;
+    /**
+     * Announce change to screen readers
+     * @private
+     * @param {string} message
+     * @returns {void}
+     */
+    private _announceChange;
+    /**
+     * Handle keyboard events on column title
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {void}
+     */
+    private _handleColumnKeydown;
+    /**
+     * Handle keyboard events on add button
+     * @private
+     * @param {KeyboardEvent} e
+     * @returns {void}
+     */
+    private _handleAddButtonKeydown;
     /**
      * Handle the add item event
      * @private
