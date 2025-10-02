@@ -1,10 +1,49 @@
 import { ReactiveController } from "lit";
 import { KanbanBoard, KanbanItem } from "..";
+/**
+ * Custom error class for validation errors
+ * @class ValidationError
+ * @extends Error
+ * @since 1.2.0
+ */
+export declare class ValidationError extends Error {
+    constructor(message: string);
+}
 export declare class KanbanController implements ReactiveController {
     host: KanbanBoard;
     constructor(host: KanbanBoard);
     hostConnected(): void;
     hostDisconnected(): void;
+    /**
+     * Validate column ID
+     * @param columnId string
+     * @returns void
+     * @throws {ValidationError}
+     * @private
+     * @memberof KanbanController
+     * @since 1.2.0
+     */
+    private _validateColumnId;
+    /**
+     * Validate item ID
+     * @param itemId string
+     * @returns void
+     * @throws {ValidationError}
+     * @private
+     * @memberof KanbanController
+     * @since 1.2.0
+     */
+    private _validateItemId;
+    /**
+     * Validate item data
+     * @param item KanbanItem
+     * @returns void
+     * @throws {ValidationError}
+     * @private
+     * @memberof KanbanController
+     * @since 1.2.0
+     */
+    private _validateItem;
     /**
      * Get the items for the kanban controller
      * @param {string} columnId
@@ -32,7 +71,7 @@ export declare class KanbanController implements ReactiveController {
      * const item = kanban.insertItem("1", { id: "1", content: "Hello" });
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.2.0
      * @public
      */
     insertItem(columnId: string, item: KanbanItem): KanbanItem;
@@ -48,7 +87,7 @@ export declare class KanbanController implements ReactiveController {
      * kanban.insertColumn("Hello");
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.2.0
      * @public
      */
     updateColumn(columnId: string, newTitle: string): void;
@@ -64,7 +103,7 @@ export declare class KanbanController implements ReactiveController {
      * kanban.deleteColumn("1");
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.2.0
      * @public
      */
     updateItem(itemId: string, newProps: {

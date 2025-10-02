@@ -1,3 +1,16 @@
+import { ERROR_MESSAGES } from "..";
+/**
+ * Custom error class for validation errors
+ * @class ValidationError
+ * @extends Error
+ * @since 1.2.0
+ */
+export class ValidationError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+    }
+}
 export class KanbanController {
     // Define the constructor for the kanban controller
     constructor(host) {
@@ -7,6 +20,68 @@ export class KanbanController {
     hostConnected() { }
     // Define the host disconnected for the kanban controller
     hostDisconnected() { }
+    /**
+     * Validate column ID
+     * @param columnId string
+     * @returns void
+     * @throws {ValidationError}
+     * @private
+     * @memberof KanbanController
+     * @since 1.2.0
+     */
+    _validateColumnId(columnId) {
+        if (!columnId || typeof columnId !== 'string') {
+            throw new ValidationError(ERROR_MESSAGES.INVALID_COLUMN_ID);
+        }
+        if (!this.host.data.columns) {
+            throw new ValidationError(ERROR_MESSAGES.NO_COLUMNS);
+        }
+        const exists = this.host.data.columns.some(c => c.id === columnId);
+        if (!exists) {
+            throw new ValidationError(ERROR_MESSAGES.COLUMN_NOT_FOUND);
+        }
+    }
+    /**
+     * Validate item ID
+     * @param itemId string
+     * @returns void
+     * @throws {ValidationError}
+     * @private
+     * @memberof KanbanController
+     * @since 1.2.0
+     */
+    _validateItemId(itemId) {
+        if (!itemId || typeof itemId !== 'string') {
+            throw new ValidationError(ERROR_MESSAGES.INVALID_ITEM_ID);
+        }
+        if (!this.host.data.columns) {
+            throw new ValidationError(ERROR_MESSAGES.NO_COLUMNS);
+        }
+        const found = this._findItemAndColumn(this.host.data.columns, itemId);
+        if (!found) {
+            throw new ValidationError(ERROR_MESSAGES.ITEM_NOT_FOUND);
+        }
+    }
+    /**
+     * Validate item data
+     * @param item KanbanItem
+     * @returns void
+     * @throws {ValidationError}
+     * @private
+     * @memberof KanbanController
+     * @since 1.2.0
+     */
+    _validateItem(item) {
+        if (!item || typeof item !== 'object') {
+            throw new ValidationError(ERROR_MESSAGES.INVALID_DATA);
+        }
+        if (!item.id || typeof item.id !== 'string') {
+            throw new ValidationError('Item must have a valid ID');
+        }
+        if (item.content !== undefined && typeof item.content !== 'string') {
+            throw new ValidationError('Item content must be a string');
+        }
+    }
     /**
      * Get the items for the kanban controller
      * @param {string} columnId
@@ -44,17 +119,20 @@ export class KanbanController {
      * const item = kanban.insertItem("1", { id: "1", content: "Hello" });
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.2.0
      * @public
      */
     insertItem(columnId, item) {
+        // Validate inputs
+        this._validateColumnId(columnId);
+        this._validateItem(item);
         const data = Object.assign({}, this.host.data);
         if (!data.columns) {
-            throw new Error("No columns available.");
+            throw new ValidationError(ERROR_MESSAGES.NO_COLUMNS);
         }
         const column = data.columns.find((column) => column.id === columnId);
         if (!column) {
-            throw new Error("Column does not exist.");
+            throw new ValidationError(ERROR_MESSAGES.COLUMN_NOT_FOUND);
         }
         column.items.push(item);
         this._saveData(data);
@@ -72,17 +150,22 @@ export class KanbanController {
      * kanban.insertColumn("Hello");
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.2.0
      * @public
      */
     updateColumn(columnId, newTitle) {
+        // Validate inputs
+        this._validateColumnId(columnId);
+        if (newTitle !== undefined && typeof newTitle !== 'string') {
+            throw new ValidationError('Column title must be a string');
+        }
         const data = Object.assign({}, this.host.data);
         if (!data.columns) {
-            throw new Error("No columns available.");
+            throw new ValidationError(ERROR_MESSAGES.NO_COLUMNS);
         }
         const column = data.columns.find((column) => column.id === columnId);
         if (!column) {
-            throw new Error("Column not found.");
+            throw new ValidationError(ERROR_MESSAGES.COLUMN_NOT_FOUND);
         }
         column.title = newTitle === undefined ? column.title : newTitle;
         this._saveData(data);
@@ -99,17 +182,33 @@ export class KanbanController {
      * kanban.deleteColumn("1");
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.2.0
      * @public
      */
     updateItem(itemId, newProps) {
+        // Validate item ID
+        this._validateItemId(itemId);
+        // Validate new properties
+        if (!newProps || typeof newProps !== 'object') {
+            throw new ValidationError(ERROR_MESSAGES.INVALID_DATA);
+        }
+        if (newProps.content !== undefined && typeof newProps.content !== 'string') {
+            throw new ValidationError('Item content must be a string');
+        }
+        if (newProps.position !== undefined && typeof newProps.position !== 'number') {
+            throw new ValidationError('Item position must be a number');
+        }
+        // If columnId is provided, validate it
+        if (newProps.columnId !== undefined) {
+            this._validateColumnId(newProps.columnId);
+        }
         const data = Object.assign({}, this.host.data);
         if (!data.columns) {
-            throw new Error("No columns available.");
+            throw new ValidationError(ERROR_MESSAGES.NO_COLUMNS);
         }
         const result = this._findItemAndColumn(data.columns, itemId);
         if (!result) {
-            throw new Error("Item not found.");
+            throw new ValidationError(ERROR_MESSAGES.ITEM_NOT_FOUND);
         }
         const [item, currentColumn] = result;
         item.content =
@@ -117,11 +216,11 @@ export class KanbanController {
         // Update column and position
         if (newProps.columnId !== undefined && newProps.position !== undefined) {
             if (!data.columns) {
-                throw new Error("No columns available.");
+                throw new ValidationError(ERROR_MESSAGES.NO_COLUMNS);
             }
             const targetColumn = data.columns.find((column) => column.id === newProps.columnId);
             if (!targetColumn) {
-                throw new Error("Target column not found.");
+                throw new ValidationError(ERROR_MESSAGES.COLUMN_NOT_FOUND);
             }
             // Delete the item from it's current column
             currentColumn.items.splice(currentColumn.items.indexOf(item), 1);

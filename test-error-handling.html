@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Board - Error Handling Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      color: #666;
+      font-size: 1.2em;
+    }
+    
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    button.danger {
+      background: #dc3545;
+    }
+    
+    button.danger:hover {
+      background: #c82333;
+    }
+    
+    .error-log {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .error-log h3 {
+      margin-top: 0;
+      color: #856404;
+    }
+    
+    .error-item {
+      background: white;
+      border-left: 4px solid #dc3545;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 3px;
+    }
+    
+    .error-item .type {
+      font-weight: bold;
+      color: #dc3545;
+      text-transform: uppercase;
+      font-size: 0.85em;
+    }
+    
+    .error-item .message {
+      color: #333;
+      margin: 5px 0;
+    }
+    
+    .error-item .user-message {
+      color: #666;
+      font-style: italic;
+      margin: 5px 0;
+    }
+    
+    .error-item .timestamp {
+      color: #999;
+      font-size: 0.85em;
+    }
+    
+    .success-message {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+      color: #155724;
+    }
+    
+    .info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 15px 0;
+      color: #0c5460;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Kanban Board - Error Handling Test</h1>
+  
+  <div class="info">
+    <strong>ℹ️ About This Test:</strong><br>
+    This page demonstrates the comprehensive error handling system implemented in the kanban-board component.
+    Click the test buttons below to trigger various error scenarios and see how they are handled.
+  </div>
+
+  <!-- Kanban Board -->
+  <kanban-board id="board"></kanban-board>
+
+  <!-- Test Controls -->
+  <div class="test-section">
+    <h2>🧪 Error Test Scenarios</h2>
+    
+    <button onclick="testValidOperation()">✅ Valid Operation (Add Item)</button>
+    <button onclick="testInvalidColumnId()" class="danger">❌ Invalid Column ID</button>
+    <button onclick="testInvalidItemId()" class="danger">❌ Invalid Item ID</button>
+    <button onclick="testInvalidItemData()" class="danger">❌ Invalid Item Data</button>
+    <button onclick="testMissingColumn()" class="danger">❌ Missing Column</button>
+    <button onclick="testInvalidPosition()" class="danger">❌ Invalid Position</button>
+    <button onclick="clearErrors()">🗑️ Clear Error Log</button>
+  </div>
+
+  <!-- Error Log -->
+  <div class="error-log">
+    <h3>📋 Error Log</h3>
+    <div id="errorList">
+      <p style="color: #999; text-align: center;">No errors logged yet. Try running some tests above.</p>
+    </div>
+  </div>
+
+  <!-- Success Log -->
+  <div class="test-section">
+    <h3>✅ Success Log</h3>
+    <div id="successList"></div>
+  </div>
+
+  <script type="module">
+    import './dist/index.js';
+
+    const board = document.getElementById('board');
+    const errorList = document.getElementById('errorList');
+    const successList = document.getElementById('successList');
+
+    // Initialize board with some data
+    board.data = {
+      columns: [
+        { 
+          id: '1', 
+          title: 'Todo', 
+          items: [
+            { id: 'item-1', content: 'Test error handling' }
+          ]
+        },
+        { 
+          id: '2', 
+          title: 'Doing', 
+          items: [
+            { id: 'item-2', content: 'Implement validation' }
+          ]
+        },
+        { 
+          id: '3', 
+          title: 'Done', 
+          items: [] 
+        },
+      ]
+    };
+
+    // Listen for error events
+    board.addEventListener('kanban-error', (event) => {
+      const error = event.detail;
+      logError(error);
+    });
+
+    // Log error to the error list
+    function logError(error) {
+      // Clear the "no errors" message
+      if (errorList.innerHTML.includes('No errors logged yet')) {
+        errorList.innerHTML = '';
+      }
+
+      const errorItem = document.createElement('div');
+      errorItem.className = 'error-item';
+      errorItem.innerHTML = `
+        <div class="type">${error.type}</div>
+        ${error.userMessage ? `<div class="user-message">👤 User Message: ${error.userMessage}</div>` : ''}
+        <div class="message">🔧 Technical: ${error.message}</div>
+        <div class="timestamp">${new Date().toLocaleTimeString()}</div>
+      `;
+      errorList.insertBefore(errorItem, errorList.firstChild);
+    }
+
+    // Log success message
+    function logSuccess(message) {
+      const successItem = document.createElement('div');
+      successItem.className = 'success-message';
+      successItem.innerHTML = `✅ ${message} - ${new Date().toLocaleTimeString()}`;
+      successList.insertBefore(successItem, successList.firstChild);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => successItem.remove(), 5000);
+    }
+
+    // Test functions - exposed globally
+    window.testValidOperation = function() {
+      try {
+        const newItem = {
+          id: `item-${Date.now()}`,
+          content: 'New valid item'
+        };
+        board.querySelector('kanban-column').dispatchEvent(
+          new CustomEvent('kanban-item-add', {
+            detail: { columnId: '1', item: newItem },
+            bubbles: true
+          })
+        );
+        logSuccess('Successfully added new item to column 1');
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    };
+
+    window.testInvalidColumnId = function() {
+      try {
+        const newItem = {
+          id: `item-${Date.now()}`,
+          content: 'This should fail'
+        };
+        board.querySelector('kanban-column').dispatchEvent(
+          new CustomEvent('kanban-item-add', {
+            detail: { columnId: 'non-existent-column', item: newItem },
+            bubbles: true
+          })
+        );
+      } catch (error) {
+        console.log('Expected error caught:', error.message);
+      }
+    };
+
+    window.testInvalidItemId = function() {
+      try {
+        board.dispatchEvent(
+          new CustomEvent('kanban-item-update', {
+            detail: { id: 'non-existent-item', content: 'Updated content' },
+            bubbles: true
+          })
+        );
+      } catch (error) {
+        console.log('Expected error caught:', error.message);
+      }
+    };
+
+    window.testInvalidItemData = function() {
+      try {
+        const invalidItem = {
+          id: 123, // Should be string
+          content: 'Invalid ID type'
+        };
+        board.querySelector('kanban-column').dispatchEvent(
+          new CustomEvent('kanban-item-add', {
+            detail: { columnId: '1', item: invalidItem },
+            bubbles: true
+          })
+        );
+      } catch (error) {
+        console.log('Expected error caught:', error.message);
+      }
+    };
+
+    window.testMissingColumn = function() {
+      try {
+        // Temporarily remove columns
+        const originalData = board.data;
+        board.data = { columns: null };
+        
+        const newItem = {
+          id: `item-${Date.now()}`,
+          content: 'This should fail'
+        };
+        
+        board.querySelector('kanban-column')?.dispatchEvent(
+          new CustomEvent('kanban-item-add', {
+            detail: { columnId: '1', item: newItem },
+            bubbles: true
+          })
+        );
+        
+        // Restore data
+        setTimeout(() => {
+          board.data = originalData;
+        }, 100);
+      } catch (error) {
+        console.log('Expected error caught:', error.message);
+      }
+    };
+
+    window.testInvalidPosition = function() {
+      try {
+        board.dispatchEvent(
+          new CustomEvent('kanban-item-update', {
+            detail: { 
+              id: 'item-1', 
+              columnId: '2',
+              position: 'invalid' // Should be number
+            },
+            bubbles: true
+          })
+        );
+      } catch (error) {
+        console.log('Expected error caught:', error.message);
+      }
+    };
+
+    window.clearErrors = function() {
+      errorList.innerHTML = '<p style="color: #999; text-align: center;">No errors logged yet. Try running some tests above.</p>';
+      successList.innerHTML = '';
+    };
+
+    // Log initialization success
+    console.log('✅ Kanban board error handling test initialized');
+    console.log('📝 Board data:', board.data);
+  </script>
+</body>
+</html>

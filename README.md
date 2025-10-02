@@ -16,6 +16,9 @@ The Kanban Board is an add-on to markdown files, allowing for a visual represent
 
 - **Drag-and-Drop Interface**: Easily move tasks between different stages of your workflow.
 - **Customizable Columns**: Tailor the board to fit your project's specific needs with customizable columns.
+- **Comprehensive Error Handling**: Built-in validation and user-friendly error messages with event-based error reporting.
+- **Keyboard Navigation**: Full accessibility support with keyboard controls for moving items between columns.
+- **TypeScript Support**: Full type safety with TypeScript definitions included.
 - **Lit**: It is powered by [Lit](https://www.npmjs.com/package/lit), a simple and fast library for building lightweight web components.
 
 ## Getting Started
@@ -65,6 +68,60 @@ The `data` attribute accepts a JSON string with the following structure:
   }>;
 }
 ```
+
+### Error Handling
+
+The kanban-board component includes comprehensive error handling with user-friendly error messages and event-based error reporting.
+
+#### Listening to Error Events
+
+You can listen to the `kanban-error` event to handle errors in your application:
+
+```javascript
+const board = document.querySelector('kanban-board');
+
+board.addEventListener('kanban-error', (event) => {
+  const error = event.detail;
+  
+  // Display user-friendly message
+  console.error('User Message:', error.userMessage);
+  
+  // Log technical details for debugging
+  console.error('Technical Details:', error.message, error.details);
+  
+  // Show notification to user
+  showNotification(error.userMessage || error.message);
+});
+```
+
+#### Error Event Structure
+
+```typescript
+type KanbanError = {
+  type: 'validation' | 'operation' | 'system';
+  message: string;          // Technical error message
+  userMessage?: string;     // User-friendly message
+  details?: any;            // Additional error details
+};
+```
+
+#### Error Types
+
+- **validation**: Invalid input data (e.g., invalid column ID, invalid item data)
+- **operation**: Failed operation (e.g., failed to move item, failed to update)
+- **system**: System-level errors (e.g., data corruption)
+
+#### Available Error Messages
+
+- `COLUMN_NOT_FOUND`: The column you are trying to update does not exist
+- `ITEM_NOT_FOUND`: The item you are trying to update does not exist
+- `INVALID_DATA`: The data provided is invalid
+- `NO_COLUMNS`: No columns are available
+- `MOVE_FAILED`: Failed to move the item
+- `UPDATE_FAILED`: Failed to update the item
+- `ADD_FAILED`: Failed to add the item
+
+For a complete demonstration of error handling, see [test-error-handling.html](test-error-handling.html).
 
 ### Development Setup
 

@@ -15,6 +15,37 @@ export type KanbanColumn = {
 export type KanbanBoardData = {
     columns?: KanbanColumn[];
 };
+/**
+ * Error types for the kanban board
+ * @type {KanbanError}
+ * @memberof KanbanBoard
+ * @since 1.2.0
+ */
+export type KanbanError = {
+    type: 'validation' | 'operation' | 'system';
+    message: string;
+    details?: any;
+    userMessage?: string;
+};
+/**
+ * User-friendly error messages
+ * @const ERROR_MESSAGES
+ * @memberof KanbanBoard
+ * @since 1.2.0
+ */
+export declare const ERROR_MESSAGES: {
+    readonly COLUMN_NOT_FOUND: "The column you are trying to update does not exist";
+    readonly ITEM_NOT_FOUND: "The item you are trying to update does not exist";
+    readonly INVALID_DATA: "The data provided is invalid";
+    readonly SAVE_FAILED: "Failed to save your changes";
+    readonly NO_COLUMNS: "No columns are available";
+    readonly INVALID_COLUMN_ID: "Invalid column ID provided";
+    readonly INVALID_ITEM_ID: "Invalid item ID provided";
+    readonly MOVE_FAILED: "Failed to move the item";
+    readonly DELETE_FAILED: "Failed to delete the item";
+    readonly UPDATE_FAILED: "Failed to update the item";
+    readonly ADD_FAILED: "Failed to add the item";
+};
 export declare class KanbanBoard extends LitElement {
     private kanbanAPI;
     static styles: import("lit").CSSResult;
@@ -64,6 +95,15 @@ export declare class KanbanBoard extends LitElement {
      * ```
      */
     constructor(data: KanbanBoardData);
+    /**
+     * Emit an error event with user-friendly feedback
+     * @param error KanbanError
+     * @returns void
+     * @private
+     * @memberof KanbanBoard
+     * @since 1.2.0
+     */
+    private _emitError;
     /**
      * Add event listeners
      * @returns void

@@ -25,6 +25,39 @@ export type KanbanBoardData = {
   columns?: KanbanColumn[];
 };
 
+/**
+ * Error types for the kanban board
+ * @type {KanbanError}
+ * @memberof KanbanBoard
+ * @since 1.2.0
+ */
+export type KanbanError = {
+  type: 'validation' | 'operation' | 'system';
+  message: string;
+  details?: any;
+  userMessage?: string;
+};
+
+/**
+ * User-friendly error messages
+ * @const ERROR_MESSAGES
+ * @memberof KanbanBoard
+ * @since 1.2.0
+ */
+export const ERROR_MESSAGES = {
+  COLUMN_NOT_FOUND: 'The column you are trying to update does not exist',
+  ITEM_NOT_FOUND: 'The item you are trying to update does not exist',
+  INVALID_DATA: 'The data provided is invalid',
+  SAVE_FAILED: 'Failed to save your changes',
+  NO_COLUMNS: 'No columns are available',
+  INVALID_COLUMN_ID: 'Invalid column ID provided',
+  INVALID_ITEM_ID: 'Invalid item ID provided',
+  MOVE_FAILED: 'Failed to move the item',
+  DELETE_FAILED: 'Failed to delete the item',
+  UPDATE_FAILED: 'Failed to update the item',
+  ADD_FAILED: 'Failed to add the item',
+} as const;
+
 @customElement("kanban-board")
 export class KanbanBoard extends LitElement {
   // Create the controller and store it
@@ -186,6 +219,28 @@ export class KanbanBoard extends LitElement {
   }
 
   /**
+   * Emit an error event with user-friendly feedback
+   * @param error KanbanError
+   * @returns void
+   * @private
+   * @memberof KanbanBoard
+   * @since 1.2.0
+   */
+  private _emitError(error: KanbanError): void {
+    // Log to console for debugging
+    console.error('[Kanban Error]', error);
+    
+    // Dispatch event for external listeners
+    this.dispatchEvent(
+      new CustomEvent('kanban-error', {
+        detail: error,
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  /**
    * Add event listeners
    * @returns void
    */
@@ -340,31 +395,39 @@ export class KanbanBoard extends LitElement {
    * @returns void
    */
   private _itemDropHandler = (e: CustomEvent) => {
-    const dropzone = e.detail.dropzone;
-    const columnId = this._getColumnIdFromDropzone(dropzone);
-    
-    if (!columnId) {
-      console.error('Could not determine column ID from dropzone');
-      return;
-    }
-    
-    const dropZonesInColumn = Array.from(
-      dropzone.parentElement.querySelectorAll("kanban-dropzone")
-    );
-    const droppedIndex = dropZonesInColumn.indexOf(dropzone);
-    const itemId = e.detail.itemId;
+    try {
+      const dropzone = e.detail.dropzone;
+      const columnId = this._getColumnIdFromDropzone(dropzone);
+      
+      if (!columnId) {
+        throw new Error('Could not determine column ID from dropzone');
+      }
+      
+      const dropZonesInColumn = Array.from(
+        dropzone.parentElement.querySelectorAll("kanban-dropzone")
+      );
+      const droppedIndex = dropZonesInColumn.indexOf(dropzone);
+      const itemId = e.detail.itemId;
 
-    // Update the item's column and position
-    this.kanbanAPI.updateItem(itemId, {
-      columnId,
-      position: droppedIndex,
-    });
-    
-    // Add drop animation to the moved item
-    this._animateDroppedItem(itemId);
-    
-    // Restore focus to the moved item
-    this._focusItem(itemId);
+      // Update the item's column and position
+      this.kanbanAPI.updateItem(itemId, {
+        columnId,
+        position: droppedIndex,
+      });
+      
+      // Add drop animation to the moved item
+      this._animateDroppedItem(itemId);
+      
+      // Restore focus to the moved item
+      this._focusItem(itemId);
+    } catch (error) {
+      this._emitError({
+        type: 'operation',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userMessage: ERROR_MESSAGES.MOVE_FAILED,
+        details: error,
+      });
+    }
   };
 
   /**
@@ -419,7 +482,16 @@ export class KanbanBoard extends LitElement {
    * @returns void
    */
   private _itemUpdateHandler = (e: CustomEvent) => {
-    this.kanbanAPI.updateItem(e.detail.id, { content: e.detail.content });
+    try {
+      this.kanbanAPI.updateItem(e.detail.id, { content: e.detail.content });
+    } catch (error) {
+      this._emitError({
+        type: 'operation',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userMessage: ERROR_MESSAGES.UPDATE_FAILED,
+        details: error,
+      });
+    }
   };
 
   /**
@@ -440,7 +512,16 @@ export class KanbanBoard extends LitElement {
    * @returns void
    */
   private _itemAddHandler = (e: CustomEvent) => {
-    this.kanbanAPI.insertItem(e.detail.columnId, e.detail.item);
+    try {
+      this.kanbanAPI.insertItem(e.detail.columnId, e.detail.item);
+    } catch (error) {
+      this._emitError({
+        type: 'operation',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userMessage: ERROR_MESSAGES.ADD_FAILED,
+        details: error,
+      });
+    }
   };
 
   /**
@@ -449,7 +530,16 @@ export class KanbanBoard extends LitElement {
    * @returns void
    */
   private _columnUpdateHandler = (e: CustomEvent) => {
-    this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
+    try {
+      this.kanbanAPI.updateColumn(e.detail.id, e.detail.title);
+    } catch (error) {
+      this._emitError({
+        type: 'operation',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userMessage: ERROR_MESSAGES.UPDATE_FAILED,
+        details: error,
+      });
+    }
   };
 
   /**
@@ -459,72 +549,84 @@ export class KanbanBoard extends LitElement {
    * @private
    */
   private _itemMoveHandler = (e: CustomEvent) => {
-    const { id, direction } = e.detail;
-    const result = this.kanbanAPI.findItemAndColumn(id);
-    
-    if (!result) {
-      console.error('Item not found:', id);
-      return;
-    }
-    
-    const [_item, column] = result;
-    const columns = this.data.columns;
-    if (!columns) return;
-    
-    const columnIndex = columns.findIndex(col => col.id === column.id);
-    const itemIndex = column.items.findIndex((i: KanbanItem) => i.id === id);
-    
-    if (columnIndex === -1 || itemIndex === -1) return;
-    
-    let moved = false;
-    
-    switch (direction) {
-      case 'up':
-        if (itemIndex > 0) {
-          this.kanbanAPI.updateItem(id, {
-            columnId: column.id,
-            position: itemIndex - 1
-          });
-          moved = true;
-        }
-        break;
-        
-      case 'down':
-        if (itemIndex < column.items.length - 1) {
-          this.kanbanAPI.updateItem(id, {
-            columnId: column.id,
-            position: itemIndex + 1
-          });
-          moved = true;
-        }
-        break;
-        
-      case 'left':
-        if (columnIndex > 0) {
-          const prevColumn = columns[columnIndex - 1];
-          this.kanbanAPI.updateItem(id, {
-            columnId: prevColumn.id,
-            position: prevColumn.items.length
-          });
-          moved = true;
-        }
-        break;
-        
-      case 'right':
-        if (columnIndex < columns.length - 1) {
-          const nextColumn = columns[columnIndex + 1];
-          this.kanbanAPI.updateItem(id, {
-            columnId: nextColumn.id,
-            position: nextColumn.items.length
-          });
-          moved = true;
-        }
-        break;
-    }
-    
-    // Restore focus to the moved item
-    if (moved) {
-      this._focusItem(id);
+    try {
+      const { id, direction } = e.detail;
+      const result = this.kanbanAPI.findItemAndColumn(id);
+      
+      if (!result) {
+        throw new Error('Item not found: ' + id);
+      }
+      
+      const [_item, column] = result;
+      const columns = this.data.columns;
+      if (!columns) {
+        throw new Error('No columns available');
+      }
+      
+      const columnIndex = columns.findIndex(col => col.id === column.id);
+      const itemIndex = column.items.findIndex((i: KanbanItem) => i.id === id);
+      
+      if (columnIndex === -1 || itemIndex === -1) {
+        throw new Error('Item or column index not found');
+      }
+      
+      let moved = false;
+      
+      switch (direction) {
+        case 'up':
+          if (itemIndex > 0) {
+            this.kanbanAPI.updateItem(id, {
+              columnId: column.id,
+              position: itemIndex - 1
+            });
+            moved = true;
+          }
+          break;
+          
+        case 'down':
+          if (itemIndex < column.items.length - 1) {
+            this.kanbanAPI.updateItem(id, {
+              columnId: column.id,
+              position: itemIndex + 1
+            });
+            moved = true;
+          }
+          break;
+          
+        case 'left':
+          if (columnIndex > 0) {
+            const prevColumn = columns[columnIndex - 1];
+            this.kanbanAPI.updateItem(id, {
+              columnId: prevColumn.id,
+              position: prevColumn.items.length
+            });
+            moved = true;
+          }
+          break;
+          
+        case 'right':
+          if (columnIndex < columns.length - 1) {
+            const nextColumn = columns[columnIndex + 1];
+            this.kanbanAPI.updateItem(id, {
+              columnId: nextColumn.id,
+              position: nextColumn.items.length
+            });
+            moved = true;
+          }
+          break;
+      }
+      
+      // Restore focus to the moved item
+      if (moved) {
+        this._focusItem(id);
+      }
+    } catch (error) {
+      this._emitError({
+        type: 'operation',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userMessage: ERROR_MESSAGES.MOVE_FAILED,
+        details: error,
+      });
     }
   };
 
