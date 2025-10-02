@@ -127,6 +127,8 @@ let KanbanBoard = class KanbanBoard extends LitElement {
             });
             // Add drop animation to the moved item
             this._animateDroppedItem(itemId);
+            // Restore focus to the moved item
+            this._focusItem(itemId);
         };
         /**
          * Update the item's content
@@ -184,6 +186,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
             const itemIndex = column.items.findIndex((i) => i.id === id);
             if (columnIndex === -1 || itemIndex === -1)
                 return;
+            let moved = false;
             switch (direction) {
                 case 'up':
                     if (itemIndex > 0) {
@@ -191,6 +194,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                             columnId: column.id,
                             position: itemIndex - 1
                         });
+                        moved = true;
                     }
                     break;
                 case 'down':
@@ -199,6 +203,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                             columnId: column.id,
                             position: itemIndex + 1
                         });
+                        moved = true;
                     }
                     break;
                 case 'left':
@@ -208,6 +213,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                             columnId: prevColumn.id,
                             position: prevColumn.items.length
                         });
+                        moved = true;
                     }
                     break;
                 case 'right':
@@ -217,8 +223,13 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                             columnId: nextColumn.id,
                             position: nextColumn.items.length
                         });
+                        moved = true;
                     }
                     break;
+            }
+            // Restore focus to the moved item
+            if (moved) {
+                this._focusItem(id);
             }
         };
         const defaultData = {
@@ -378,6 +389,50 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 }, 500);
             }
         }, 50);
+    }
+    /**
+     * Focus an item after it has been moved
+     * @param itemId string
+     * @returns void
+     * @private
+     */
+    _focusItem(itemId) {
+        // Wait for the DOM to update after the move
+        setTimeout(() => {
+            var _a, _b, _c, _d;
+            // The item is a web component, so we need to find it by its ID attribute
+            const columns = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelectorAll('kanban-column');
+            if (!columns)
+                return;
+            // Search through all columns for the item
+            for (const column of Array.from(columns)) {
+                const items = (_b = column.shadowRoot) === null || _b === void 0 ? void 0 : _b.querySelectorAll('kanban-item');
+                if (!items)
+                    continue;
+                for (const item of Array.from(items)) {
+                    const itemElement = item;
+                    if (itemElement.id === itemId) {
+                        // Focus the input element inside the item's shadow DOM for immediate editing
+                        const inputElement = (_c = itemElement.shadowRoot) === null || _c === void 0 ? void 0 : _c.querySelector('.kanban__item-input');
+                        if (inputElement) {
+                            inputElement.focus();
+                        }
+                        else {
+                            // Fallback to the item container if input not found
+                            const itemContainer = (_d = itemElement.shadowRoot) === null || _d === void 0 ? void 0 : _d.querySelector('.kanban__item');
+                            if (itemContainer) {
+                                itemContainer.focus();
+                            }
+                        }
+                        // Announce the new position to screen readers
+                        if (itemElement._announcePosition) {
+                            itemElement._announcePosition();
+                        }
+                        return;
+                    }
+                }
+            }
+        }, 100);
     }
 };
 // Define the styles for the kanban board

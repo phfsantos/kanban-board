@@ -157,8 +157,9 @@ export default class Item extends LitElement {
     }
 
     *:focus {
-      outline: 2px solid currentColor;
-      outline-offset: 2px;
+      outline: 1px solid currentColor;
+      outline-offset: 0px;
+      border-radius: 5px;
     }
   `;
 
@@ -544,5 +545,35 @@ export default class Item extends LitElement {
         detail: { id: this.id, direction: 'right' }
       })
     );
+  }
+
+  /**
+   * Announce the item's position to screen readers
+   * @public
+   * @returns {void}
+   */
+  public _announcePosition(): void {
+    // Create a live region announcement for screen readers
+    const announcement = `Item "${this.content}" is now in ${this.columnTitle} column`;
+    
+    // Find or create live region
+    let liveRegion = this.shadowRoot?.querySelector('[aria-live="polite"]') as HTMLElement;
+    if (!liveRegion) {
+      liveRegion = document.createElement('div');
+      liveRegion.setAttribute('aria-live', 'polite');
+      liveRegion.setAttribute('aria-atomic', 'true');
+      liveRegion.className = 'sr-only';
+      this.shadowRoot?.appendChild(liveRegion);
+    }
+    
+    // Update the announcement
+    liveRegion.textContent = announcement;
+    
+    // Clear after announcement is read
+    setTimeout(() => {
+      if (liveRegion) {
+        liveRegion.textContent = '';
+      }
+    }, 1000);
   }
 }

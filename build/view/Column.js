@@ -221,8 +221,9 @@ Column.styles = css `
     }
 
     *:focus {
-      outline: 2px solid currentColor;
-      outline-offset: 2px;
+      outline: 1px solid currentColor;
+      outline-offset: 0px;
+      border-radius: 5px;
     }
   `;
 __decorate([

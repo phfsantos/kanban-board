@@ -92,8 +92,9 @@ import{property as t,query as e,customElement as n}from"lit/decorators.js";impor
     }
 
     *:focus {
-      outline: 2px solid currentColor;
-      outline-offset: 2px;
+      outline: 1px solid currentColor;
+      outline-offset: 0px;
+      border-radius: 5px;
     }
   `,r([t()],s.prototype,"id",void 0),r([t()],s.prototype,"title",void 0),r([t({type:Array,reflect:!0,converter:{fromAttribute:t=>{if(!t)return[];try{return JSON.parse(t)}catch(t){return[]}},toAttribute:t=>JSON.stringify(t)}})],s.prototype,"items",void 0),r([e(".kanban__column-title")],s.prototype,"_input",void 0),s=r([n("kanban-column")],s);var d=s;export{d as default};
 //# sourceMappingURL=Column.js.map

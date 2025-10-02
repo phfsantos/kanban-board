@@ -361,6 +361,33 @@ let Item = class Item extends LitElement {
             detail: { id: this.id, direction: 'right' }
         }));
     }
+    /**
+     * Announce the item's position to screen readers
+     * @public
+     * @returns {void}
+     */
+    _announcePosition() {
+        var _a, _b;
+        // Create a live region announcement for screen readers
+        const announcement = `Item "${this.content}" is now in ${this.columnTitle} column`;
+        // Find or create live region
+        let liveRegion = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.querySelector('[aria-live="polite"]');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.className = 'sr-only';
+            (_b = this.shadowRoot) === null || _b === void 0 ? void 0 : _b.appendChild(liveRegion);
+        }
+        // Update the announcement
+        liveRegion.textContent = announcement;
+        // Clear after announcement is read
+        setTimeout(() => {
+            if (liveRegion) {
+                liveRegion.textContent = '';
+            }
+        }, 1000);
+    }
 };
 // Define the styles for the kanban item
 Item.styles = css `
@@ -485,8 +512,9 @@ Item.styles = css `
     }
 
     *:focus {
-      outline: 2px solid currentColor;
-      outline-offset: 2px;
+      outline: 1px solid currentColor;
+      outline-offset: 0px;
+      border-radius: 5px;
     }
   `;
 __decorate([

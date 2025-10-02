@@ -163,5 +163,12 @@ export declare class KanbanBoard extends LitElement {
      * @private
      */
     private _itemMoveHandler;
+    /**
+     * Focus an item after it has been moved
+     * @param itemId string
+     * @returns void
+     * @private
+     */
+    private _focusItem;
 }
 //# sourceMappingURL=index.d.ts.map

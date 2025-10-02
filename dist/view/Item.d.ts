@@ -139,5 +139,11 @@ export default class Item extends LitElement {
      * @returns {void}
      */
     private _moveRight;
+    /**
+     * Announce the item's position to screen readers
+     * @public
+     * @returns {void}
+     */
+    _announcePosition(): void;
 }
 //# sourceMappingURL=Item.d.ts.map
