@@ -375,13 +375,13 @@ export class KanbanController implements ReactiveController {
    * this._saveData(data);
    * ```
    * @since 1.0.0
-   * @version 1.0.0
+   * @version 1.3.0
    */
   private _saveData(data: KanbanBoardData): void {
-    this.host.textContent = JSON.stringify(data);
-    const oldData = this.host.data;
-    this.host.data = data;
-    this.host.requestUpdate("data", oldData);
+    // Use setData with dispatchEvent=true to trigger persistence
+    this.host.setData(data, true);
+    
+    // Also dispatch the legacy kanban-save event for backwards compatibility
     this.host.dispatchEvent(
       new CustomEvent("kanban-save", {
         detail: data,

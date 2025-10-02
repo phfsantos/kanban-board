@@ -107,7 +107,7 @@
         <div id="debugLog" class="debug-log"></div>
     </div>
 
-    <kanban-board id="board" data="%7B%22columns%22%3A%5B%7B%22id%22%3A%221%22%2C%22title%22%3A%22Todo%22%2C%22items%22%3A%5B%5D%7D%2C%7B%22id%22%3A%222%22%2C%22title%22%3A%22Doing%22%2C%22items%22%3A%5B%5D%7D%2C%7B%22id%22%3A%223%22%2C%22title%22%3A%22Done%22%2C%22items%22%3A%5B%5D%7D%5D%7D"></kanban-board>
+    <kanban-board id="board"></kanban-board>
 
     <script type="module">
         import {KanbanBoard} from './dist/index.js';
@@ -152,7 +152,7 @@
 
         // Sample data
         const board = document.getElementById('board');
-        board.data = {
+        const sampleData = {
             columns: [
                 {
                     id: 'todo',
@@ -176,6 +176,9 @@
                 }
             ]
         };
+        
+        // Use the new setData() API
+        board.setData(sampleData);
 
         window.clearDebugLog = function() {
             debugLogEl.innerHTML = '';

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test NPM Import</title>
+    <script type="importmap">
+    {
+        "imports": {
+            "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
+            "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3/decorators.js/+esm",
+            "lit/directives/class-map.js": "https://cdn.jsdelivr.net/npm/lit@3/directives/class-map.js/+esm"
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>Testing NPM Package Import</h1>
+    
+    <!-- Test 1: Main component -->
+    <h2>Test 1: Main KanbanBoard component (new API)</h2>
+    <kanban-board id="test-board"></kanban-board>
+    
+    <!-- Test 2: Backwards compatibility with data attribute (deprecated) -->
+    <h2>Test 2: Backwards compatibility (deprecated data attribute)</h2>
+    <kanban-board data="%7B%22columns%22%3A%5B%7B%22id%22%3A%221%22%2C%22title%22%3A%22Backlog%22%2C%22items%22%3A%5B%5D%7D%2C%7B%22id%22%3A%222%22%2C%22title%22%3A%22In%20Progress%22%2C%22items%22%3A%5B%5D%7D%5D%7D"></kanban-board>
+    
+    <!-- Test 3: Individual components (should auto-register when imported) -->
+    <h2>Test 3: Direct component usage</h2>
+    <div style="display: flex; gap: 20px;">
+        <kanban-column id="test-col" title="Test Column" items="[]"></kanban-column>
+    </div>
+
+    <script type="module">
+        // Test importing the main component
+        import { KanbanBoard } from './dist/index.js';
+        console.log('✓ KanbanBoard imported:', KanbanBoard);
+        
+        // Test importing individual components
+        import { Column, Item, DropZone } from './dist/index.js';
+        console.log('✓ Column imported:', Column);
+        console.log('✓ Item imported:', Item);
+        console.log('✓ DropZone imported:', DropZone);
+        
+        // Test new API
+        const testBoard = document.getElementById('test-board');
+        
+        // Test setData method
+        const testData = {
+            columns: [
+                { 
+                    id: "1", 
+                    title: "Todo", 
+                    items: [
+                        { id: "1", content: "Test item 1" },
+                        { id: "2", content: "Test item 2" }
+                    ] 
+                },
+                { id: "2", title: "Doing", items: [] },
+                { id: "3", title: "Done", items: [] }
+            ]
+        };
+        
+        const success = testBoard.setData(testData);
+        console.log('✓ setData() method:', success ? 'SUCCESS' : 'FAILED');
+        
+        // Test getData method
+        const retrievedData = testBoard.getData();
+        console.log('✓ getData() method:', retrievedData);
+        
+        // Test change event
+        testBoard.addEventListener('kanban-change', (e) => {
+            console.log('✓ kanban-change event fired:', e.detail);
+        });
+        
+        // Test error event
+        testBoard.addEventListener('kanban-error', (e) => {
+            console.error('✓ kanban-error event fired:', e.detail);
+        });
+        
+        // Test validation with invalid data
+        setTimeout(() => {
+            console.log('\n=== Testing Validation ===');
+            const invalidData = { columns: [] }; // Empty columns should fail
+            const invalidResult = testBoard.setData(invalidData);
+            console.log('Invalid data test:', invalidResult ? 'UNEXPECTED SUCCESS' : 'CORRECTLY REJECTED');
+        }, 500);
+        
+        // Verify components are registered
+        setTimeout(() => {
+            const registeredComponents = [
+                'kanban-board',
+                'kanban-column',
+                'kanban-item',
+                'kanban-dropzone'
+            ];
+            
+            console.log('\n=== Component Registration Status ===');
+            registeredComponents.forEach(name => {
+                const isDefined = customElements.get(name);
+                console.log(`${isDefined ? '✓' : '✗'} ${name}: ${isDefined ? 'registered' : 'NOT registered'}`);
+            });
+            
+            // Test component rendering
+            const board = document.querySelector('kanban-board');
+            const column = document.querySelector('kanban-column');
+            console.log('\n=== Component Rendering ===');
+            console.log('✓ KanbanBoard rendered:', board && board.shadowRoot !== null);
+            console.log('✓ Column rendered:', column && column.shadowRoot !== null);
+        }, 1000);
+    </script>
+</body>
+</html>

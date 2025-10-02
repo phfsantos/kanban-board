@@ -1,4 +1,5 @@
 import { LitElement } from "lit";
+import { z } from "zod";
 import Column from "./view/Column";
 import Item from "./view/Item";
 import DropZone from "./view/DropZone";
@@ -15,6 +16,36 @@ export type KanbanColumn = {
 export type KanbanBoardData = {
     columns?: KanbanColumn[];
 };
+/**
+ * Zod schemas for runtime validation
+ * @const KanbanItemSchema
+ * @const KanbanColumnSchema
+ * @const KanbanBoardDataSchema
+ * @memberof KanbanBoard
+ * @since 1.3.0
+ */
+export declare const KanbanItemSchema: z.ZodObject<{
+    id: z.ZodString;
+    content: z.ZodString;
+}, z.core.$strip>;
+export declare const KanbanColumnSchema: z.ZodObject<{
+    id: z.ZodString;
+    title: z.ZodString;
+    items: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        content: z.ZodString;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
+export declare const KanbanBoardDataSchema: z.ZodObject<{
+    columns: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        title: z.ZodString;
+        items: z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            content: z.ZodString;
+        }, z.core.$strip>>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
 /**
  * Error types for the kanban board
  * @type {KanbanError}
@@ -50,25 +81,26 @@ export declare class KanbanBoard extends LitElement {
     private kanbanAPI;
     static styles: import("lit").CSSResult;
     /**
-     * Define the properties for the kanban board
+     * Internal data storage for the kanban board
+     * No longer reflected to attribute to avoid size/encoding issues
+     * Use setData() and getData() methods instead
      * @type {KanbanBoardData}
      * @memberof KanbanBoard
      * @since 1.0.0
-     * @version 1.0.0
-     * @example
-     * ```ts
-     * const data = {
-     * columns: [
-     *  { id: "1", title: "Todo", items: [] },
-     * { id: "2", title: "Doing", items: [] },
-     * { id: "3", title: "Done", items: [] },
-     * ],
-     * };
-     * ```
-     * @public
-     * @readonly
+     * @version 1.3.0
+     * @private
      */
-    data: KanbanBoardData;
+    private _data;
+    /**
+     * Getter for backwards compatibility
+     * @deprecated Use getData() method instead
+     */
+    get data(): KanbanBoardData;
+    /**
+     * Setter for backwards compatibility
+     * @deprecated Use setData() method instead
+     */
+    set data(value: KanbanBoardData);
     _dialog: HTMLDialogElement;
     _dialogConfirmButton: HTMLButtonElement;
     private _pendingDeleteId;
@@ -94,7 +126,7 @@ export declare class KanbanBoard extends LitElement {
      * });
      * ```
      */
-    constructor(data: KanbanBoardData);
+    constructor(data?: KanbanBoardData);
     /**
      * Emit an error event with user-friendly feedback
      * @param error KanbanError
@@ -105,7 +137,32 @@ export declare class KanbanBoard extends LitElement {
      */
     private _emitError;
     /**
-     * Add event listeners
+     * Get the current kanban board data
+     * @returns {KanbanBoardData} Current board data
+     * @public
+     * @memberof KanbanBoard
+     * @since 1.3.0
+     */
+    getData(): KanbanBoardData;
+    /**
+     * Set the kanban board data with validation
+     * @param {KanbanBoardData} data - The data to set
+     * @param {boolean} dispatchEvent - Whether to dispatch a change event (default: true)
+     * @returns {boolean} True if data was set successfully, false otherwise
+     * @public
+     * @memberof KanbanBoard
+     * @since 1.3.0
+     */
+    setData(data: KanbanBoardData, dispatchEvent?: boolean): boolean;
+    /**
+     * Dispatch a data change event for external persistence
+     * @private
+     * @memberof KanbanBoard
+     * @since 1.3.0
+     */
+    private _dispatchDataChange;
+    /**
+     * Add event listeners and handle backwards compatibility
      * @returns void
      */
     connectedCallback(): void;

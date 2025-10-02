@@ -165,8 +165,8 @@
     const errorList = document.getElementById('errorList');
     const successList = document.getElementById('successList');
 
-    // Initialize board with some data
-    board.data = {
+    // Initialize board with some data using the new API
+    const initialData = {
       columns: [
         { 
           id: '1', 
@@ -189,11 +189,18 @@
         },
       ]
     };
+    
+    board.setData(initialData);
 
     // Listen for error events
     board.addEventListener('kanban-error', (event) => {
       const error = event.detail;
       logError(error);
+    });
+    
+    // Listen for data changes
+    board.addEventListener('kanban-change', (event) => {
+      console.log('Board data changed:', event.detail);
     });
 
     // Log error to the error list
@@ -293,25 +300,17 @@
 
     window.testMissingColumn = function() {
       try {
-        // Temporarily remove columns
-        const originalData = board.data;
-        board.data = { columns: null };
+        // Test setting data with no columns using the new API
+        const invalidData = { columns: [] };
+        const success = board.setData(invalidData);
         
-        const newItem = {
-          id: `item-${Date.now()}`,
-          content: 'This should fail'
-        };
+        if (!success) {
+          logSuccess('Correctly rejected empty columns data');
+        }
         
-        board.querySelector('kanban-column')?.dispatchEvent(
-          new CustomEvent('kanban-item-add', {
-            detail: { columnId: '1', item: newItem },
-            bubbles: true
-          })
-        );
-        
-        // Restore data
+        // Restore original data
         setTimeout(() => {
-          board.data = originalData;
+          board.setData(initialData);
         }, 100);
       } catch (error) {
         console.log('Expected error caught:', error.message);
@@ -342,7 +341,7 @@
 
     // Log initialization success
     console.log('✅ Kanban board error handling test initialized');
-    console.log('📝 Board data:', board.data);
+    console.log('📝 Board data:', board.getData());
   </script>
 </body>
 </html>

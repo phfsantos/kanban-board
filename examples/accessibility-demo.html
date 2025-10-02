@@ -141,9 +141,10 @@
     <kanban-board id="board"></kanban-board>
     
     <script>
-        // Initialize the board with some sample data
+        // Initialize the board with some sample data using the new API
         const board = document.getElementById('board');
-        board.data = {
+        
+        const sampleData = {
             columns: [
                 {
                     id: '1',
@@ -176,6 +177,14 @@
             ]
         };
         
+        // Use the new setData() API method
+        board.setData(sampleData);
+        
+        // Listen for data changes
+        board.addEventListener('kanban-change', (e) => {
+            console.log('💾 Board data changed:', e.detail);
+        });
+        
         // Log accessibility events for demonstration
         board.addEventListener('kanban-item-move', (e) => {
             console.log('🎹 Keyboard navigation used:', e.detail);
@@ -187,6 +196,10 @@
         
         board.addEventListener('kanban-item-delete', (e) => {
             console.log('🗑️ Item deleted:', e.detail);
+        });
+        
+        board.addEventListener('kanban-error', (e) => {
+            console.error('❌ Kanban error:', e.detail);
         });
     </script>
 </body>

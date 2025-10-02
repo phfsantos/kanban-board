@@ -7,7 +7,19 @@ A simple kanban board to be used as an add-on to markdown files within markdown 
 The Kanban Board is an add-on to markdown files, allowing for a visual representation of tasks and progress directly within your repository. This project aims to integrate a Kanban-style board to enhance project management and workflow visualization. It can also be used in any website.
 
 ```html
-<kanban-board class="language-kanban-board" data="%7B%22columns%22%3A%5B%7B%22id%22%3A%221%22%2C%22title%22%3A%22Todo%22%2C%22items%22%3A%5B%7B%22id%22%3A%2219767%22%2C%22content%22%3A%22Fix%20bugs%22%7D%5D%7D%2C%7B%22id%22%3A%222%22%2C%22title%22%3A%22Doing%22%2C%22items%22%3A%5B%7B%22id%22%3A%2216079%22%2C%22content%22%3A%22Basic%20design%22%7D%5D%7D%2C%7B%22id%22%3A%223%22%2C%22title%22%3A%22Done%22%2C%22items%22%3A%5B%7B%22id%22%3A%2225152%22%2C%22content%22%3A%22Created%20repo%22%7D%5D%7D%5D%7D"></kanban-board>
+<kanban-board id="board"></kanban-board>
+<script type="module">
+  import '@phfsantos/kanban-board';
+  
+  const board = document.getElementById('board');
+  board.setData({
+    columns: [
+      { id: "1", title: "Todo", items: [{ id: "1", content: "Fix bugs" }] },
+      { id: "2", title: "Doing", items: [{ id: "2", content: "Basic design" }] },
+      { id: "3", title: "Done", items: [{ id: "3", content: "Created repo" }] }
+    ]
+  });
+</script>
 ```
 
 ![](assets/20240611_051537_image.png)
@@ -18,6 +30,8 @@ The Kanban Board is an add-on to markdown files, allowing for a visual represent
 - **Customizable Columns**: Tailor the board to fit your project's specific needs with customizable columns.
 - **Comprehensive Error Handling**: Built-in validation and user-friendly error messages with event-based error reporting.
 - **Keyboard Navigation**: Full accessibility support with keyboard controls for moving items between columns.
+- **Data Validation**: Automatic validation with Zod to ensure data integrity.
+- **Event-Driven Architecture**: Listen to data changes for automatic persistence.
 - **TypeScript Support**: Full type safety with TypeScript definitions included.
 - **Lit**: It is powered by [Lit](https://www.npmjs.com/package/lit), a simple and fast library for building lightweight web components.
 
@@ -45,20 +59,140 @@ Import and use the kanban-board web component in your application:
 import '@phfsantos/kanban-board';
 ```
 
-Then use it in your HTML:
+Then use it in your HTML with the new API:
 
 ```html
-<kanban-board 
-  class="language-kanban-board" 
-  data='{"columns":[{"id":"1","title":"Todo","items":[{"id":"19767","content":"Fix bugs"}]},{"id":"2","title":"Doing","items":[{"id":"16079","content":"Basic design"}]},{"id":"3","title":"Done","items":[{"id":"25152","content":"Created repo"}]}]}'>
-</kanban-board>
+<kanban-board id="board"></kanban-board>
+
+<script type="module">
+  const board = document.getElementById('board');
+  
+  // Set initial data
+  board.setData({
+    columns: [
+      { 
+        id: "1", 
+        title: "Todo", 
+        items: [
+          { id: "1", content: "Fix bugs" }
+        ] 
+      },
+      { id: "2", title: "Doing", items: [] },
+      { id: "3", title: "Done", items: [] }
+    ]
+  });
+  
+  // Listen for data changes to persist them
+  board.addEventListener('kanban-change', (e) => {
+    // Save to localStorage, backend API, etc.
+    localStorage.setItem('kanban-data', JSON.stringify(e.detail.data));
+  });
+</script>
 ```
 
-The `data` attribute accepts a JSON string with the following structure:
+> **Note:** The old `data` attribute is deprecated. See [MIGRATION-GUIDE-v1.3.md](MIGRATION-GUIDE-v1.3.md) for details.
 
+## API Reference
+
+### Methods
+
+#### `setData(data, dispatchEvent = true): boolean`
+
+Set the kanban board data with automatic validation.
+
+**Parameters:**
+- `data` (KanbanBoardData): The board data to set
+- `dispatchEvent` (boolean, optional): Whether to dispatch a `kanban-change` event (default: `true`)
+
+**Returns:** `boolean` - `true` if data was set successfully, `false` if validation failed
+
+**Example:**
+```javascript
+const success = board.setData({
+  columns: [
+    { id: "1", title: "Todo", items: [] }
+  ]
+});
+
+if (!success) {
+  console.error('Invalid data provided');
+}
+```
+
+#### `getData(): KanbanBoardData`
+
+Get a copy of the current board data.
+
+**Returns:** `KanbanBoardData` - A deep copy of the current board state
+
+**Example:**
+```javascript
+const currentData = board.getData();
+console.log(currentData);
+
+// Save to backend
+fetch('/api/kanban', {
+  method: 'POST',
+  body: JSON.stringify(currentData)
+});
+```
+
+### Events
+
+#### `kanban-change`
+
+Dispatched whenever the board data changes (items moved, added, deleted, or updated).
+
+**Event Detail:**
 ```typescript
 {
-  columns: Array<{
+  data: KanbanBoardData,  // Current board data
+  timestamp: number        // Unix timestamp in milliseconds
+}
+```
+
+**Example:**
+```javascript
+board.addEventListener('kanban-change', (e) => {
+  console.log('Data changed at:', new Date(e.detail.timestamp));
+  localStorage.setItem('kanban-data', JSON.stringify(e.detail.data));
+});
+```
+
+#### `kanban-error`
+
+Dispatched when an error occurs in the board.
+
+**Event Detail:**
+```typescript
+{
+  type: 'validation' | 'operation' | 'system',
+  message: string,          // Technical error message
+  userMessage?: string,     // User-friendly message
+  details?: any            // Additional error details
+}
+```
+
+**Example:**
+```javascript
+board.addEventListener('kanban-error', (e) => {
+  const error = e.detail;
+  
+  // Show user-friendly message
+  alert(error.userMessage || error.message);
+  
+  // Log technical details
+  console.error('Kanban error:', error);
+});
+```
+
+### Data Types
+
+The `data` structure follows this TypeScript interface:
+
+```typescript
+type KanbanBoardData = {
+  columns?: Array<{
     id: string;
     title: string;
     items: Array<{
@@ -66,6 +200,26 @@ The `data` attribute accepts a JSON string with the following structure:
       content: string;
     }>;
   }>;
+}
+```
+
+### Validation Schemas
+
+The component uses Zod for runtime validation. You can import and use these schemas:
+
+```typescript
+import { 
+  KanbanBoardDataSchema,
+  KanbanColumnSchema,
+  KanbanItemSchema 
+} from '@phfsantos/kanban-board';
+
+// Validate data before setting
+try {
+  const validated = KanbanBoardDataSchema.parse(myData);
+  board.setData(validated);
+} catch (error) {
+  console.error('Validation failed:', error);
 }
 ```
 

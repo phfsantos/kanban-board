@@ -157,7 +157,7 @@ export declare class KanbanController implements ReactiveController {
      * this._saveData(data);
      * ```
      * @since 1.0.0
-     * @version 1.0.0
+     * @version 1.3.0
      */
     private _saveData;
 }

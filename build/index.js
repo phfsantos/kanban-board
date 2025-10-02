@@ -5,14 +5,35 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { LitElement, html, css } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
+import { customElement, query, state } from "lit/decorators.js";
 import { KanbanController } from "./controllers/kanban";
+import { z } from "zod";
 // Import and export child components to ensure they're included in bundle
 import Column from "./view/Column";
 import Item from "./view/Item";
 import DropZone from "./view/DropZone";
 // Export them so they're not tree-shaken
 export { Column, Item, DropZone };
+/**
+ * Zod schemas for runtime validation
+ * @const KanbanItemSchema
+ * @const KanbanColumnSchema
+ * @const KanbanBoardDataSchema
+ * @memberof KanbanBoard
+ * @since 1.3.0
+ */
+export const KanbanItemSchema = z.object({
+    id: z.string().min(1, "Item ID cannot be empty"),
+    content: z.string(),
+});
+export const KanbanColumnSchema = z.object({
+    id: z.string().min(1, "Column ID cannot be empty"),
+    title: z.string().min(1, "Column title cannot be empty"),
+    items: z.array(KanbanItemSchema),
+});
+export const KanbanBoardDataSchema = z.object({
+    columns: z.array(KanbanColumnSchema).optional(),
+});
 /**
  * User-friendly error messages
  * @const ERROR_MESSAGES
@@ -33,6 +54,20 @@ export const ERROR_MESSAGES = {
     ADD_FAILED: 'Failed to add the item',
 };
 let KanbanBoard = class KanbanBoard extends LitElement {
+    /**
+     * Getter for backwards compatibility
+     * @deprecated Use getData() method instead
+     */
+    get data() {
+        return this._data;
+    }
+    /**
+     * Setter for backwards compatibility
+     * @deprecated Use setData() method instead
+     */
+    set data(value) {
+        this.setData(value, false);
+    }
     /**
      * Constructor for the kanban board
      * make sure we have some data to work with
@@ -60,25 +95,16 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         // Create the controller and store it
         this.kanbanAPI = new KanbanController(this);
         /**
-         * Define the properties for the kanban board
+         * Internal data storage for the kanban board
+         * No longer reflected to attribute to avoid size/encoding issues
+         * Use setData() and getData() methods instead
          * @type {KanbanBoardData}
          * @memberof KanbanBoard
          * @since 1.0.0
-         * @version 1.0.0
-         * @example
-         * ```ts
-         * const data = {
-         * columns: [
-         *  { id: "1", title: "Todo", items: [] },
-         * { id: "2", title: "Doing", items: [] },
-         * { id: "3", title: "Done", items: [] },
-         * ],
-         * };
-         * ```
-         * @public
-         * @readonly
+         * @version 1.3.0
+         * @private
          */
-        this.data = {
+        this._data = {
             columns: [
                 { id: "1", title: "Todo", items: [] },
                 { id: "2", title: "Doing", items: [] },
@@ -237,7 +263,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                     throw new Error('Item not found: ' + id);
                 }
                 const [_item, column] = result;
-                const columns = this.data.columns;
+                const columns = this._data.columns;
                 if (!columns) {
                     throw new Error('No columns available');
                 }
@@ -308,15 +334,13 @@ let KanbanBoard = class KanbanBoard extends LitElement {
                 { id: "3", title: "Done", items: [] },
             ],
         };
-        // set the data
-        this.data = data;
-        // if we don't have any data, we can't do anything
-        if (!data ||
-            !data.columns ||
-            !Array.isArray(data.columns) ||
-            data.columns.length === 0) {
+        // if we have data, validate and set it
+        if (data && data.columns && Array.isArray(data.columns) && data.columns.length > 0) {
+            this.setData(data, false);
+        }
+        else {
             // set default data
-            this.data = defaultData;
+            this._data = defaultData;
         }
     }
     /**
@@ -338,11 +362,96 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         }));
     }
     /**
-     * Add event listeners
+     * Get the current kanban board data
+     * @returns {KanbanBoardData} Current board data
+     * @public
+     * @memberof KanbanBoard
+     * @since 1.3.0
+     */
+    getData() {
+        return JSON.parse(JSON.stringify(this._data));
+    }
+    /**
+     * Set the kanban board data with validation
+     * @param {KanbanBoardData} data - The data to set
+     * @param {boolean} dispatchEvent - Whether to dispatch a change event (default: true)
+     * @returns {boolean} True if data was set successfully, false otherwise
+     * @public
+     * @memberof KanbanBoard
+     * @since 1.3.0
+     */
+    setData(data, dispatchEvent = true) {
+        try {
+            // Validate the data with Zod
+            const validated = KanbanBoardDataSchema.parse(data);
+            // Ensure we have columns
+            if (!validated.columns || validated.columns.length === 0) {
+                throw new Error('Board must have at least one column');
+            }
+            // Update internal data
+            const oldData = this._data;
+            this._data = validated;
+            // Trigger a re-render
+            this.requestUpdate('_data', oldData);
+            // Dispatch change event for persistence
+            if (dispatchEvent) {
+                this._dispatchDataChange();
+            }
+            return true;
+        }
+        catch (error) {
+            this._emitError({
+                type: 'validation',
+                message: error instanceof Error ? error.message : 'Invalid data format',
+                userMessage: ERROR_MESSAGES.INVALID_DATA,
+                details: error,
+            });
+            return false;
+        }
+    }
+    /**
+     * Dispatch a data change event for external persistence
+     * @private
+     * @memberof KanbanBoard
+     * @since 1.3.0
+     */
+    _dispatchDataChange() {
+        this.dispatchEvent(new CustomEvent('kanban-change', {
+            detail: {
+                data: this.getData(),
+                timestamp: Date.now(),
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    /**
+     * Add event listeners and handle backwards compatibility
      * @returns void
      */
     connectedCallback() {
         super.connectedCallback();
+        // Backwards compatibility: check for data attribute
+        const dataAttr = this.getAttribute('data');
+        if (dataAttr) {
+            try {
+                const decoded = decodeURIComponent(dataAttr);
+                const parsed = JSON.parse(decoded);
+                this.setData(parsed, false);
+                // Remove the attribute as we no longer use it
+                console.warn('KanbanBoard: The "data" attribute is deprecated. Use the setData() method instead. ' +
+                    'See documentation for migration guide.');
+            }
+            catch (error) {
+                console.error('KanbanBoard: Failed to parse data attribute:', error);
+                this._emitError({
+                    type: 'validation',
+                    message: 'Failed to parse data attribute',
+                    userMessage: ERROR_MESSAGES.INVALID_DATA,
+                    details: error,
+                });
+            }
+        }
         // Setup dialog listeners once
         this.updateComplete.then(() => {
             this._setupDialogListeners();
@@ -400,7 +509,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
         @kanban-item-move="${this._itemMoveHandler}"
         @kanban-column-update="${this._columnUpdateHandler}"
       >
-        ${(_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
+        ${(_b = (_a = this._data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
             return html `<kanban-column
             id="${column.id}"
             title="${column.title}"
@@ -586,15 +695,8 @@ KanbanBoard.styles = css `
     }
   `;
 __decorate([
-    property({
-        reflect: true,
-        type: Object,
-        converter: {
-            toAttribute: (value) => encodeURIComponent(JSON.stringify(value)),
-            fromAttribute: (value) => JSON.parse(decodeURIComponent(String(value))),
-        },
-    })
-], KanbanBoard.prototype, "data", void 0);
+    state()
+], KanbanBoard.prototype, "_data", void 0);
 __decorate([
     query("dialog")
 ], KanbanBoard.prototype, "_dialog", void 0);

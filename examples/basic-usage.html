@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kanban Board</title>
+</head>
+
+<body>
+	<kanban-board id="board"></kanban-board>
+	<script src="./dist/demo.js" type="module"></script>
+	<script type="module">
+		// Initialize the board with data using the new API
+		const board = document.getElementById('board');
+		
+		// Initial data
+		const initialData = {
+			columns: [
+				{ id: "1", title: "Todo", items: [] },
+				{ id: "2", title: "Doing", items: [] },
+				{ id: "3", title: "Done", items: [] }
+			]
+		};
+		
+		// Set the data using the new setData() method
+		board.setData(initialData);
+		
+		// Listen for data changes to persist them (e.g., to localStorage)
+		board.addEventListener('kanban-change', (e) => {
+			const { data, timestamp } = e.detail;
+			console.log('Board data changed at', new Date(timestamp).toISOString());
+			
+			// Example: Save to localStorage
+			localStorage.setItem('kanban-board-data', JSON.stringify(data));
+		});
+		
+		// Load saved data from localStorage if available
+		const savedData = localStorage.getItem('kanban-board-data');
+		if (savedData) {
+			try {
+				const parsed = JSON.parse(savedData);
+				board.setData(parsed);
+				console.log('Loaded saved data from localStorage');
+			} catch (error) {
+				console.error('Failed to load saved data:', error);
+			}
+		}
+		
+		// Listen for errors
+		board.addEventListener('kanban-error', (e) => {
+			const error = e.detail;
+			console.error('Kanban Error:', error.userMessage || error.message);
+		});
+	</script>
+</body>
+
+</html>
