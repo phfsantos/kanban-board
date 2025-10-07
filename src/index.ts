@@ -3,12 +3,18 @@ import { customElement, query, state } from "lit/decorators.js";
 import { KanbanController } from "./controllers/kanban";
 import { z } from "zod";
 
-// Import and export child components to ensure they're included in bundle
+// Import child components to ensure they're registered
 import Column from "./view/Column";
 import Item from "./view/Item";
 import DropZone from "./view/DropZone";
 
-// Export them so they're not tree-shaken
+// Force components to be included in bundle by referencing them
+// This ensures the decorators are executed and custom elements are registered
+void Column;
+void Item;
+void DropZone;
+
+// Also export them for direct access if needed
 export { Column, Item, DropZone };
 
 export type KanbanItem = {
