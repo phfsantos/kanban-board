@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kanban Board - Custom Dialog Styling with ::part()</title>
+	<style>
+		/* Custom dialog styling using ::part() selectors */
+		
+		/* Style the dialog backdrop and container */
+		kanban-board::part(dialog) {
+			border: 2px solid #3b82f6;
+			border-radius: 12px;
+			padding: 2rem;
+			box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+			            0 10px 10px -5px rgba(0, 0, 0, 0.04);
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+		}
+		
+		/* Style the form container */
+		kanban-board::part(dialog-form) {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+		
+		/* Style the dialog title */
+		kanban-board::part(dialog-title) {
+			color: white;
+			font-size: 1.5rem;
+			font-weight: bold;
+			margin: 0 0 0.5rem 0;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		}
+		
+		/* Style the dialog description */
+		kanban-board::part(dialog-description) {
+			color: rgba(255, 255, 255, 0.9);
+			margin: 0 0 1rem 0;
+			line-height: 1.5;
+		}
+		
+		/* Style the buttons container */
+		kanban-board::part(dialog-buttons) {
+			display: flex;
+			gap: 1rem;
+			justify-content: flex-end;
+		}
+		
+		/* Style the cancel button */
+		kanban-board::part(dialog-cancel-button) {
+			padding: 0.5rem 1.5rem;
+			background: rgba(255, 255, 255, 0.2);
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			border-radius: 6px;
+			color: white;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		
+		kanban-board::part(dialog-cancel-button):hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-1px);
+		}
+		
+		/* Style the confirm button */
+		kanban-board::part(dialog-confirm-button) {
+			padding: 0.5rem 1.5rem;
+			background: #ef4444;
+			border: 1px solid #dc2626;
+			border-radius: 6px;
+			color: white;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		
+		kanban-board::part(dialog-confirm-button):hover {
+			background: #dc2626;
+			transform: translateY(-1px);
+			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		}
+		
+		/* Alternative theme - Dark mode dialog */
+		.dark-theme kanban-board::part(dialog) {
+			background: #1f2937;
+			border: 1px solid #374151;
+			color: #f3f4f6;
+		}
+		
+		.dark-theme kanban-board::part(dialog-title) {
+			color: #f9fafb;
+		}
+		
+		.dark-theme kanban-board::part(dialog-description) {
+			color: #d1d5db;
+		}
+		
+		/* Demo page styling */
+		body {
+			font-family: system-ui, -apple-system, sans-serif;
+			padding: 2rem;
+			background: #f3f4f6;
+		}
+		
+		.theme-toggle {
+			margin-bottom: 1rem;
+			padding: 0.5rem 1rem;
+			background: #3b82f6;
+			color: white;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+		
+		.instructions {
+			background: white;
+			padding: 1.5rem;
+			border-radius: 8px;
+			margin-bottom: 2rem;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		}
+		
+		.instructions h2 {
+			margin-top: 0;
+			color: #1f2937;
+		}
+		
+		.instructions code {
+			background: #f3f4f6;
+			padding: 0.2rem 0.4rem;
+			border-radius: 3px;
+			font-family: monospace;
+		}
+		
+		.instructions pre {
+			background: #1f2937;
+			color: #f3f4f6;
+			padding: 1rem;
+			border-radius: 6px;
+			overflow-x: auto;
+		}
+	</style>
+</head>
+<body>
+	<div class="instructions">
+		<h2>Custom Dialog Styling with ::part()</h2>
+		<p>This demo shows how to use CSS <code>::part()</code> selectors to customize the delete confirmation dialog.</p>
+		
+		<h3>Available Dialog Parts:</h3>
+		<ul>
+			<li><code>::part(dialog)</code> - The main dialog element</li>
+			<li><code>::part(dialog-form)</code> - The form container</li>
+			<li><code>::part(dialog-title)</code> - The dialog title</li>
+			<li><code>::part(dialog-description)</code> - The description text</li>
+			<li><code>::part(dialog-buttons)</code> - The buttons container</li>
+			<li><code>::part(dialog-cancel-button)</code> - The cancel button</li>
+			<li><code>::part(dialog-confirm-button)</code> - The confirm button</li>
+		</ul>
+		
+		<h3>Example Usage:</h3>
+		<pre><code>/* Custom dialog styling */
+kanban-board::part(dialog) {
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+kanban-board::part(dialog-confirm-button) {
+  background: #ef4444;
+  color: white;
+}
+</code></pre>
+		
+		<p><strong>Try it:</strong> Add an item to the Todo column, then click the delete icon (×) to see the custom-styled dialog.</p>
+	</div>
+	
+	<button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Theme</button>
+	
+	<kanban-board id="board"></kanban-board>
+	
+	<script src="../dist/demo.js" type="module"></script>
+	<script type="module">
+		// Initialize the board with sample data
+		const board = document.getElementById('board');
+		
+		const initialData = {
+			columns: [
+				{ 
+					id: "1", 
+					title: "Todo", 
+					items: [
+						{ id: "1", content: "Add an item and try to delete it!" },
+						{ id: "2", content: "Notice the custom dialog styling" }
+					] 
+				},
+				{ id: "2", title: "Doing", items: [] },
+				{ id: "3", title: "Done", items: [] }
+			]
+		};
+		
+		board.setData(initialData);
+		
+		// Theme toggle function
+		window.toggleTheme = function() {
+			document.body.classList.toggle('dark-theme');
+		};
+	</script>
+</body>
+</html>

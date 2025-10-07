@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Board - Complete Part Selectors Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .controls h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: 10px 20px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .theme-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    /* Default Theme */
+    kanban-board::part(kanban-container) {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+    }
+
+    kanban-board::part(column) {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      transition: all 0.3s;
+    }
+
+    kanban-board::part(column-title) {
+      color: #2c3e50;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    kanban-board::part(column-title):hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+
+    kanban-board::part(item-container) {
+      transition: all 0.3s;
+    }
+
+    kanban-board::part(item-content) {
+      background: white;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    kanban-board::part(item-content):hover {
+      background: #f8f9fa;
+    }
+
+    /* Dark Theme */
+    body.theme-dark kanban-board::part(kanban-container) {
+      background: #1a1a1a;
+    }
+
+    body.theme-dark kanban-board::part(column) {
+      background: #2d2d2d;
+      border: 1px solid #404040;
+    }
+
+    body.theme-dark kanban-board::part(column-title) {
+      color: #e0e0e0;
+      border-bottom: 2px solid #4a9eff;
+    }
+
+    body.theme-dark kanban-board::part(item-container) {
+      background: #3a3a3a;
+      border: 1px solid #4a4a4a;
+    }
+
+    body.theme-dark kanban-board::part(item-content) {
+      background: #3a3a3a;
+      color: #e0e0e0;
+    }
+
+    body.theme-dark kanban-board::part(column-add-button) {
+      background: #2d5f8a;
+      color: #fff;
+    }
+
+    body.theme-dark kanban-board::part(dialog) {
+      background: #2d2d2d;
+      color: #e0e0e0;
+      border: 2px solid #4a4a4a;
+    }
+
+    /* Material Theme */
+    body.theme-material kanban-board::part(kanban-container) {
+      background: #fafafa;
+    }
+
+    body.theme-material kanban-board::part(column) {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      border-radius: 2px;
+    }
+
+    body.theme-material kanban-board::part(column-title) {
+      color: #212121;
+      font-weight: 500;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    body.theme-material kanban-board::part(item-container) {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      border-radius: 2px;
+    }
+
+    body.theme-material kanban-board::part(item-container):hover {
+      box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    }
+
+    body.theme-material kanban-board::part(column-add-button) {
+      background: #2196f3;
+      color: white;
+      text-transform: uppercase;
+      font-weight: 500;
+      box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14);
+    }
+
+    /* Neon Theme */
+    body.theme-neon {
+      background: #0a0a0a;
+    }
+
+    body.theme-neon kanban-board::part(kanban-container) {
+      background: #1a1a1a;
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    body.theme-neon kanban-board::part(column) {
+      background: #0d0d0d;
+      border: 1px solid #ff00ff;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+
+    body.theme-neon kanban-board::part(column-title) {
+      color: #00ffff;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+      border-bottom: 2px solid #00ffff;
+    }
+
+    body.theme-neon kanban-board::part(item-container) {
+      background: #1a1a1a;
+      border: 1px solid #00ff00;
+      box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+    }
+
+    body.theme-neon kanban-board::part(item-content) {
+      background: #1a1a1a;
+      color: #00ff00;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    }
+
+    body.theme-neon kanban-board::part(column-add-button) {
+      background: transparent;
+      color: #ff00ff;
+      border: 2px solid #ff00ff;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+    }
+
+    /* Glassmorphism Theme */
+    body.theme-glass {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body.theme-glass kanban-board::part(kanban-container) {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    body.theme-glass kanban-board::part(column) {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    body.theme-glass kanban-board::part(column-title) {
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    body.theme-glass kanban-board::part(item-container) {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    body.theme-glass kanban-board::part(item-content) {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    body.theme-glass kanban-board::part(column-add-button) {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+    }
+
+    /* Drop Zone Styling for all themes */
+    kanban-board::part(dropzone-area) {
+      transition: all 0.3s ease;
+    }
+
+    kanban-board::part(dropzone-content) {
+      background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(41, 128, 185, 0.3));
+      border-radius: 4px;
+    }
+
+    /* Item Actions Styling */
+    kanban-board::part(item-actions) {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+      padding: 4px;
+    }
+
+    kanban-board::part(item-action-up),
+    kanban-board::part(item-action-down),
+    kanban-board::part(item-action-left),
+    kanban-board::part(item-action-right) {
+      background: #3498db;
+      color: white;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    kanban-board::part(item-action-up):hover,
+    kanban-board::part(item-action-down):hover,
+    kanban-board::part(item-action-left):hover,
+    kanban-board::part(item-action-right):hover {
+      background: #2980b9;
+      transform: scale(1.1);
+    }
+
+    kanban-board::part(item-action-delete) {
+      background: #e74c3c;
+      color: white;
+      border: none;
+    }
+
+    kanban-board::part(item-action-delete):hover {
+      background: #c0392b;
+      transform: scale(1.1);
+    }
+
+    /* Dialog Styling */
+    kanban-board::part(dialog) {
+      border: 2px solid #e74c3c;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    kanban-board::part(dialog-title) {
+      color: #e74c3c;
+      font-size: 1.5em;
+    }
+
+    kanban-board::part(dialog-cancel-button) {
+      background: #95a5a6;
+      color: white;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    kanban-board::part(dialog-cancel-button):hover {
+      background: #7f8c8d;
+    }
+
+    kanban-board::part(dialog-confirm-button) {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    kanban-board::part(dialog-confirm-button):hover {
+      background: #c0392b;
+    }
+
+    .info-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-panel h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .part-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .part-item {
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      border-left: 3px solid #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h2>🎨 Theme Selector</h2>
+    <div class="theme-selector">
+      <button class="theme-btn active" onclick="setTheme('default')">Default</button>
+      <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+      <button class="theme-btn" onclick="setTheme('material')">Material</button>
+      <button class="theme-btn" onclick="setTheme('neon')">Neon</button>
+      <button class="theme-btn" onclick="setTheme('glass')">Glassmorphism</button>
+    </div>
+  </div>
+
+  <kanban-board id="kanban"></kanban-board>
+
+  <div class="info-panel">
+    <h3>📋 Available Part Selectors (24 total)</h3>
+    <div class="part-list">
+      <div class="part-item">kanban-container</div>
+      <div class="part-item">column</div>
+      <div class="part-item">column-title</div>
+      <div class="part-item">column-items</div>
+      <div class="part-item">column-add-button</div>
+      <div class="part-item">item</div>
+      <div class="part-item">item-container</div>
+      <div class="part-item">item-content</div>
+      <div class="part-item">item-actions</div>
+      <div class="part-item">item-action-up</div>
+      <div class="part-item">item-action-down</div>
+      <div class="part-item">item-action-left</div>
+      <div class="part-item">item-action-right</div>
+      <div class="part-item">item-action-delete</div>
+      <div class="part-item">dropzone</div>
+      <div class="part-item">dropzone-area</div>
+      <div class="part-item">dropzone-content</div>
+      <div class="part-item">dialog</div>
+      <div class="part-item">dialog-form</div>
+      <div class="part-item">dialog-title</div>
+      <div class="part-item">dialog-description</div>
+      <div class="part-item">dialog-buttons</div>
+      <div class="part-item">dialog-cancel-button</div>
+      <div class="part-item">dialog-confirm-button</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { KanbanBoard } from '../dist/index.js';
+
+    const kanban = document.getElementById('kanban');
+    
+    kanban.setData({
+      columns: [
+        {
+          id: "1",
+          title: "To Do",
+          items: [
+            { id: "1", content: "Design mockups" },
+            { id: "2", content: "Create database schema" }
+          ]
+        },
+        {
+          id: "2",
+          title: "In Progress",
+          items: [
+            { id: "3", content: "Implement authentication" },
+            { id: "4", content: "Build API endpoints" }
+          ]
+        },
+        {
+          id: "3",
+          title: "Done",
+          items: [
+            { id: "5", content: "Project setup" },
+            { id: "6", content: "Requirements gathering" }
+          ]
+        }
+      ]
+    });
+
+    // Persist changes
+    kanban.addEventListener('kanban-save', (e) => {
+      console.log('Kanban data changed:', e.detail);
+    });
+  </script>
+
+  <script>
+    function setTheme(theme) {
+      // Remove all theme classes
+      document.body.className = '';
+      
+      // Add new theme class
+      if (theme !== 'default') {
+        document.body.classList.add(`theme-${theme}`);
+      }
+      
+      // Update active button
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
