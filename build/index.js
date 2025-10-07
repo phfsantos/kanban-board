@@ -504,6 +504,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
     render() {
         var _a, _b;
         return html `<div
+        part="kanban-container"
         class="kanban"
         role="region"
         aria-label="Kanban board"
@@ -516,6 +517,7 @@ let KanbanBoard = class KanbanBoard extends LitElement {
       >
         ${(_b = (_a = this._data) === null || _a === void 0 ? void 0 : _a.columns) === null || _b === void 0 ? void 0 : _b.map((column) => {
             return html `<kanban-column
+            part="column"
             id="${column.id}"
             title="${column.title}"
             items="${JSON.stringify(column.items)}"
@@ -524,21 +526,24 @@ let KanbanBoard = class KanbanBoard extends LitElement {
       </div>
       <!-- A modal dialog containing a form -->
       <dialog 
+        part="dialog"
         role="alertdialog"
         aria-labelledby="dialog-title"
         aria-describedby="dialog-desc"
         aria-modal="true"
       >
-        <form>
-          <h2 id="dialog-title" style="margin-top: 0; font-size: 1.2em;">Confirm Delete</h2>
-          <p id="dialog-desc">Are you sure you want to delete this item? This action cannot be undone.</p>
-          <div>
+        <form part="dialog-form">
+          <h2 id="dialog-title" part="dialog-title" style="margin-top: 0; font-size: 1.2em;">Confirm Delete</h2>
+          <p id="dialog-desc" part="dialog-description">Are you sure you want to delete this item? This action cannot be undone.</p>
+          <div part="dialog-buttons">
             <button 
+              part="dialog-cancel-button"
               value="cancel" 
               formmethod="dialog"
               aria-label="Cancel deletion"
             >Cancel</button>
             <button 
+              part="dialog-confirm-button"
               value="yes"
               aria-label="Confirm deletion"
             >Confirm</button>

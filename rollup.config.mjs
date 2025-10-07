@@ -24,7 +24,14 @@ export default {
     }),
     terser({
       compress: false, // Disable compression to preserve all code
-      mangle: false // Don't mangle names
+      mangle: false, // Don't mangle names
+      format: {
+        preserve_annotations: true,
+        comments: 'all'
+      },
+      // Explicitly preserve all properties and attributes
+      keep_fnames: true,
+      keep_classnames: true
     })
   ]
 };

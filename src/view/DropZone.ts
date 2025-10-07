@@ -62,12 +62,13 @@ export default class DropZone extends LitElement {
   render():ReturnType<LitElement["render"]> {
     return html`
       <div 
+        part="dropzone-area"
         class="kanban__dropzone"
         role="button"
         aria-label="Drop zone for items"
         tabindex="-1"
       >
-        <div class="kanban__dropzone-content"></div>
+        <div part="dropzone-content" class="kanban__dropzone-content"></div>
       </div>
     `;
   }

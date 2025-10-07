@@ -45,6 +45,7 @@ let Column = class Column extends LitElement {
       </div>
       
       <div
+        part="column-title"
         class="kanban__column-title"
         role="textbox"
         aria-label="Column title: ${this.title}"
@@ -59,20 +60,23 @@ let Column = class Column extends LitElement {
       </span>
       
       <div 
+        part="column-items"
         class="kanban__column-items"
         role="list"
         aria-label="Items in ${this.title} column"
       >
-        <kanban-dropzone></kanban-dropzone>
+        <kanban-dropzone part="dropzone"></kanban-dropzone>
         ${this.items.map((item) => html `<kanban-item
+                part="item"
                 id="${item.id}"
                 content="${item.content}"
                 .columnId="${this.id}"
                 .columnTitle="${this.title}"
               ></kanban-item>
-              <kanban-dropzone></kanban-dropzone>`)}
+              <kanban-dropzone part="dropzone"></kanban-dropzone>`)}
       </div>
       <button 
+        part="column-add-button"
         class="kanban__add-item" 
         @click="${this._addItem}"
         @keydown="${this._handleAddButtonKeydown}"

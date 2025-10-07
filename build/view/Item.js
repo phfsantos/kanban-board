@@ -59,6 +59,7 @@ let Item = class Item extends LitElement {
      */
     render() {
         return html `<div
+      part="item-container"
       class="kanban__item"
       data-id="${this.id}"
       id="item-${this.id}"
@@ -71,6 +72,7 @@ let Item = class Item extends LitElement {
     >
       
       <div
+        part="item-content"
         class="kanban__item-input"
         role="textbox"
         aria-label="Item content: ${this.content || 'Empty'}"
@@ -83,8 +85,9 @@ let Item = class Item extends LitElement {
       ></div>
       
       <!-- Keyboard navigation controls -->
-      <div class="item-actions" role="group" aria-label="Item actions">
+      <div part="item-actions" class="item-actions" role="group" aria-label="Item actions">
         <button 
+          part="item-action-up"
           class="item-action-button"
           @click="${this._moveUp}"
           @keydown="${this._handleButtonKeydown}"
@@ -93,6 +96,7 @@ let Item = class Item extends LitElement {
           type="button"
         >↑</button>
         <button 
+          part="item-action-down"
           class="item-action-button"
           @click="${this._moveDown}"
           @keydown="${this._handleButtonKeydown}"
@@ -101,6 +105,7 @@ let Item = class Item extends LitElement {
           type="button"
         >↓</button>
         <button 
+          part="item-action-left"
           class="item-action-button"
           @click="${this._moveLeft}"
           @keydown="${this._handleButtonKeydown}"
@@ -109,6 +114,7 @@ let Item = class Item extends LitElement {
           type="button"
         >←</button>
         <button 
+          part="item-action-right"
           class="item-action-button"
           @click="${this._moveRight}"
           @keydown="${this._handleButtonKeydown}"
@@ -117,13 +123,14 @@ let Item = class Item extends LitElement {
           type="button"
         >→</button>
         <button 
+          part="item-action-delete"
           class="kanban__item-delete" 
           @click="${this._deleteHandler}"
           @keydown="${this._handleDeleteKeydown}"
           aria-label="Delete item: ${this.content || 'this item'}"
           title="Delete item (or Shift+Delete)"
           type="button"
-        >🗑️</button>
+        >❌</button>
       </div>
       <span id="item-desc-${this.id}" class="sr-only">
         Edit item content. Press Escape to finish editing.
@@ -401,6 +408,7 @@ Item.styles = css `
 
     .kanban__item {
       transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
     }
 
     .kanban__item.dragging {
@@ -427,7 +435,7 @@ Item.styles = css `
     }
 
     .kanban__item-input {
-      padding: 10px 15px;
+      padding: 20px 14px;
       box-sizing: border-box;
       background: white;
       border-radius: 5px;
@@ -437,16 +445,16 @@ Item.styles = css `
 
     .kanban__item-delete {
       cursor: pointer;
-      font-size: 14px;
-      color: darkred;
+      font-size: 8px;
+      color: inherit;
       user-select: none;
       border-radius: 3px;
       border: 1px solid rgba(0, 0, 0, 0.2);
       padding: 2px 2px;
       background: rgba(255, 0, 0, 0.05);
       transition: background 0.2s, transform 0.1s;
-      height: 25px;
-      width: 25px;
+      height: 18px;
+      width: 18px;
     }
 
     .kanban__item-delete:hover,
@@ -468,6 +476,9 @@ Item.styles = css `
       margin-top: 4px;
       opacity: 0;
       transition: opacity 0.2s ease;
+      position: absolute;
+      right: 0;
+      top: -2px;
     }
 
     .kanban__item:hover .item-actions,
@@ -477,16 +488,17 @@ Item.styles = css `
     }
 
     .item-action-button {
+      color: inherit;
       background: rgba(0, 0, 0, 0.05);
       border: 1px solid rgba(0, 0, 0, 0.2);
       border-radius: 3px;
       padding: 2px 6px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 10px;
       line-height: 1;
       transition: background 0.2s, transform 0.1s;
-      height: 25px;
-      width: 25px;
+      height: 18px;
+      width: 18px;
     }
 
     .item-action-button:hover,

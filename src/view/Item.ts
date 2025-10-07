@@ -192,6 +192,7 @@ export default class Item extends LitElement {
    */
   render(): ReturnType<LitElement["render"]> {
     return html`<div
+      part="item-container"
       class="kanban__item"
       data-id="${this.id}"
       id="item-${this.id}"
@@ -204,6 +205,7 @@ export default class Item extends LitElement {
     >
       
       <div
+        part="item-content"
         class="kanban__item-input"
         role="textbox"
         aria-label="Item content: ${this.content || 'Empty'}"
@@ -216,8 +218,9 @@ export default class Item extends LitElement {
       ></div>
       
       <!-- Keyboard navigation controls -->
-      <div class="item-actions" role="group" aria-label="Item actions">
+      <div part="item-actions" class="item-actions" role="group" aria-label="Item actions">
         <button 
+          part="item-action-up"
           class="item-action-button"
           @click="${this._moveUp}"
           @keydown="${this._handleButtonKeydown}"
@@ -226,6 +229,7 @@ export default class Item extends LitElement {
           type="button"
         >↑</button>
         <button 
+          part="item-action-down"
           class="item-action-button"
           @click="${this._moveDown}"
           @keydown="${this._handleButtonKeydown}"
@@ -234,6 +238,7 @@ export default class Item extends LitElement {
           type="button"
         >↓</button>
         <button 
+          part="item-action-left"
           class="item-action-button"
           @click="${this._moveLeft}"
           @keydown="${this._handleButtonKeydown}"
@@ -242,6 +247,7 @@ export default class Item extends LitElement {
           type="button"
         >←</button>
         <button 
+          part="item-action-right"
           class="item-action-button"
           @click="${this._moveRight}"
           @keydown="${this._handleButtonKeydown}"
@@ -250,6 +256,7 @@ export default class Item extends LitElement {
           type="button"
         >→</button>
         <button 
+          part="item-action-delete"
           class="kanban__item-delete" 
           @click="${this._deleteHandler}"
           @keydown="${this._handleDeleteKeydown}"

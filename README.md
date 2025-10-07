@@ -277,6 +277,177 @@ type KanbanError = {
 
 For a complete demonstration of error handling, see [test-error-handling.html](test-error-handling.html).
 
+## Customization
+
+The kanban-board component exposes **24 named parts** for complete customization using CSS `::part()` selectors. This allows you to style every aspect of the board without breaking shadow DOM encapsulation.
+
+### All Available Parts (24)
+
+#### Main Container
+- `::part(kanban-container)` - The main kanban board container
+
+#### Columns (4 parts)
+- `::part(column)` - Individual column component
+- `::part(column-title)` - Column title (editable)
+- `::part(column-items)` - Container for items in a column
+- `::part(column-add-button)` - "Add" button at bottom of column
+
+#### Items (9 parts)
+- `::part(item)` - Individual item component
+- `::part(item-container)` - Outer container for an item
+- `::part(item-content)` - Item content area (editable)
+- `::part(item-actions)` - Container for item action buttons
+- `::part(item-action-up)` - Move item up button (↑)
+- `::part(item-action-down)` - Move item down button (↓)
+- `::part(item-action-left)` - Move item left button (←)
+- `::part(item-action-right)` - Move item right button (→)
+- `::part(item-action-delete)` - Delete item button (❌)
+
+#### Drop Zones (3 parts)
+- `::part(dropzone)` - Drop zone component
+- `::part(dropzone-area)` - Outer drop zone area
+- `::part(dropzone-content)` - Inner drop zone visual indicator
+
+#### Dialog (7 parts)
+- `::part(dialog)` - Delete confirmation dialog
+- `::part(dialog-form)` - Form wrapper inside dialog
+- `::part(dialog-title)` - Dialog title
+- `::part(dialog-description)` - Description text
+- `::part(dialog-buttons)` - Container for dialog buttons
+- `::part(dialog-cancel-button)` - Cancel button
+- `::part(dialog-confirm-button)` - Confirm/delete button
+
+### Quick Start Examples
+
+#### Basic Styling
+
+```css
+/* Style the main container */
+kanban-board::part(kanban-container) {
+  background: #f5f5f5;
+  padding: 40px;
+  border-radius: 8px;
+}
+
+/* Style all columns */
+kanban-board::part(column) {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style items */
+kanban-board::part(item-container) {
+  background: white;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.2s;
+}
+
+kanban-board::part(item-container):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+```
+
+#### Dark Theme Example
+
+```css
+kanban-board::part(kanban-container) {
+  background: #1a1a1a;
+}
+
+kanban-board::part(column) {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+}
+
+kanban-board::part(column-title) {
+  color: #e0e0e0;
+}
+
+kanban-board::part(item-container) {
+  background: #3a3a3a;
+  border: 1px solid #4a4a4a;
+}
+
+kanban-board::part(item-content) {
+  color: #e0e0e0;
+}
+```
+
+#### Item Actions Styling
+
+```css
+/* Style action buttons */
+kanban-board::part(item-action-up),
+kanban-board::part(item-action-down),
+kanban-board::part(item-action-left),
+kanban-board::part(item-action-right) {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 8px;
+}
+
+kanban-board::part(item-action-delete) {
+  background: #e74c3c;
+  color: white;
+}
+```
+
+### Complete Documentation
+
+For comprehensive documentation, theme examples, and advanced techniques:
+
+- 📖 [Complete Part Selectors Reference](./docs/PART-SELECTORS.md) - All 24 parts with detailed examples
+- 🎨 [Interactive Demo](./examples/complete-parts-demo.html) - Live demo with 5 preset themes
+- 🔔 [Dialog Customization Guide](./docs/DIALOG-CUSTOMIZATION.md) - Detailed dialog styling guide
+
+### Browser Support
+
+CSS `::part()` is supported in:
+- Chrome/Edge: 73+
+- Firefox: 72+
+- Safari: 13.1+
+- Opera: 60+
+
+kanban-board::part(dialog-confirm-button):hover {
+  background: #dc2626;
+}
+```
+
+#### Example: Dark Theme Integration
+
+```css
+/* Light theme */
+kanban-board::part(dialog) {
+  background: white;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+/* Dark theme */
+.dark-mode kanban-board::part(dialog) {
+  background: #1f2937;
+  color: #f3f4f6;
+  border: 1px solid #374151;
+}
+
+.dark-mode kanban-board::part(dialog-title) {
+  color: #f9fafb;
+}
+
+.dark-mode kanban-board::part(dialog-confirm-button) {
+  background: #ef4444;
+  color: white;
+}
+```
+
+For a complete demonstration, see [examples/custom-dialog-styling.html](examples/custom-dialog-styling.html).
+
+For detailed documentation on dialog customization, see [DIALOG-CUSTOMIZATION.md](docs/DIALOG-CUSTOMIZATION.md).
+
 ### Development Setup
 
 To contribute or run the project locally:
