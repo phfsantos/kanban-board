@@ -1,6 +1,6 @@
 {
   "name": "@phfsantos/kanban-board",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A kanban board web component for markdown files built with Lit",
   "type": "module",
   "main": "./dist/index.js",
