@@ -3,6 +3,7 @@ import terser from '@rollup/plugin-terser';
 
 export default {
   input: ['build/index.js', 'build/controllers/kanban.js', 'build/view/Column.js', 'build/view/Item.js', 'build/view/DropZone.js'],
+  treeshake: false, // Disable tree-shaking to ensure all components are included
   output: {
     dir: 'dist/',
     format: 'es',
@@ -14,6 +15,9 @@ export default {
   plugins: [
     resolve(),
     // minifyHTML(),
-    terser()
+    terser({
+      compress: false, // Disable compression to preserve all code
+      mangle: false // Don't mangle names
+    })
   ]
 };
